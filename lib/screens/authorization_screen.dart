@@ -1,4 +1,35 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:async';
+
+Future<void> loginUser(String email, String password) async {
+  final url = Uri.parse('http://127.0.0.1:8000/api/auth/login');
+
+  final response = await http.post(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({
+      'email': email,
+      'password': password,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    final token = data['token']; // Adjust if your API returns it under a different key
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('api_token', token);
+
+    print('Login successful, token saved');
+  } else {
+    print('Login failed: ${response.body}');
+  }
+}
 
 class AuthorizationScreen extends StatefulWidget {
   const AuthorizationScreen({super.key});
@@ -94,7 +125,12 @@ class _AuthorizationScreen extends State<AuthorizationScreen> {
                               borderRadius: BorderRadius.all(Radius.circular(10))
                             )
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            final email = _emailController.text.trim();
+                            final password = _passwordController.text;
+
+                            loginUser(email, password);
+                          },
                           child: const Text(
                             'Login',
                             style: TextStyle(

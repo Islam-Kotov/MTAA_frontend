@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
+import 'home_screen.dart';
 
-Future<void> loginUser(String email, String password) async {
-  final url = Uri.parse('http://127.0.0.1:8000/api/auth/login');
+Future<bool> loginUser(String email, String password) async {
+  final url = Uri.parse('http://192.168.1.245:8000/api/auth/login');
 
   final response = await http.post(
     url,
@@ -26,8 +27,10 @@ Future<void> loginUser(String email, String password) async {
     await prefs.setString('api_token', token);
 
     print('Login successful, token saved');
+    return true;
   } else {
     print('Login failed: ${response.body}');
+    return false;
   }
 }
 
@@ -125,11 +128,24 @@ class _AuthorizationScreen extends State<AuthorizationScreen> {
                               borderRadius: BorderRadius.all(Radius.circular(10))
                             )
                           ),
-                          onPressed: () {
-                            final email = _emailController.text.trim();
-                            final password = _passwordController.text;
+                          onPressed: () async {
+                            final success = await loginUser(
+                              _emailController.text,
+                              _passwordController.text
+                            );
 
-                            loginUser(email, password);
+                            if (!mounted) return; // Prevent using context if widget is disposed
+
+                            if (success) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => const HomeScreen()),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Login failed')),
+                              );
+                            }
                           },
                           child: const Text(
                             'Login',

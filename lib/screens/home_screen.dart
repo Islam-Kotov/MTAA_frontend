@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:semestral_project/screens/all_screens.dart';
+import 'package:semestral_project/screens/workout_categories_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,7 +15,7 @@ class _HomeScreen extends State<HomeScreen> {
 
   final List<Widget> _screens = [
     Center(child: Text('My Plan')),
-    Center(child: Text('Workouts')),
+    WorkoutCategoriesScreen(), // ← теперь работает!
     Center(child: Text('Community')),
     ProfileScreen(),
   ];

@@ -6,7 +6,7 @@ import 'dart:async';
 import 'all_screens.dart';
 
 Future<bool> loginUser(String email, String password) async {
-  final url = Uri.parse('http://192.168.1.36:8000/api/auth/login');
+  final url = Uri.parse('http://10.0.2.2:8000/api/auth/login');
 
   final response = await http.post(
     url,

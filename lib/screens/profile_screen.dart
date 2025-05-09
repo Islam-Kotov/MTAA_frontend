@@ -25,7 +25,7 @@ Future<Uint8List> showPrivate(String photo_url) async {
 }
 
 Future<Map<String, dynamic>?> getProfile() async {
-  final url = Uri.parse('http://192.168.1.36:8000/api/profile');
+  final url = Uri.parse('http://10.0.2.2:8000/api/profile');
 
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('api_token');
@@ -48,7 +48,7 @@ Future<Map<String, dynamic>?> getProfile() async {
 }
 
 Future<bool> logout() async {
-  final url = Uri.parse('http://192.168.1.36:8000/api/logout');
+  final url = Uri.parse('http://10.0.2.2:8000/api/logout');
 
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('api_token');

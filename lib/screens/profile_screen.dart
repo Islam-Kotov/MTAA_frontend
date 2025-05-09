@@ -2,10 +2,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
-import 'authorization_screen.dart';
+import 'all_screens.dart';
 
 Future<bool> logout() async {
-  final url = Uri.parse('http://192.168.1.245:8000/api/logout');
+  final url = Uri.parse('http://192.168.1.36:8000/api/logout');
+
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('api_token');
 

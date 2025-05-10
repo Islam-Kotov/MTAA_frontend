@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -124,6 +124,34 @@ Future<bool> deleteAccount(String password) async {
   }
 }
 
+Future<bool> saveProfile(String weight, String height, String birthdate) async {
+  final url = Uri.parse('http://192.168.1.36:8000/api/profile');
+
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('api_token');
+
+  final response = await http.post(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: jsonEncode({
+      'weight': weight,
+      'height': height,
+      'birthdate': birthdate,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    print('${response.body}');
+    return true;
+  } else {
+    print('${response.body}');
+    return false;
+  }
+}
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -181,7 +209,7 @@ class _ProfileScreen extends State<ProfileScreen> {
         children: [
           Container(
             width: double.infinity,
-            color: Color.fromRGBO(145, 193, 232, 1), // Light blue background
+            color: Color.fromRGBO(145, 193, 232, 1),
             padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
             child: Column(
               children: [
@@ -239,7 +267,7 @@ class _ProfileScreen extends State<ProfileScreen> {
                         ],
                       ),
                       Container(
-                        height: 60, // adjust as needed
+                        height: 60,
                         width: 1,
                         color: Colors.white,
                         margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -263,7 +291,7 @@ class _ProfileScreen extends State<ProfileScreen> {
                         ],
                       ),
                       Container(
-                        height: 60, // adjust as needed
+                        height: 60,
                         width: 1,
                         color: Colors.white,
                         margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -311,7 +339,12 @@ class _ProfileScreen extends State<ProfileScreen> {
                     ),
                     trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
                     onTap: () {
-                      
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => MyProfilePage()),
+                      ).then((_) {
+                        fetchProfile();
+                      });
                     },
                   )
                 ),
@@ -454,11 +487,13 @@ class SettingsPage extends StatelessWidget {
 }
 
 class PasswordResetDialog extends StatefulWidget {
+  const PasswordResetDialog({super.key});
+
   @override
-  _PasswordResetDialog createState() => _PasswordResetDialog();
+  _PasswordResetDialogState createState() => _PasswordResetDialogState();
 }
 
-class _PasswordResetDialog extends State<PasswordResetDialog> {
+class _PasswordResetDialogState extends State<PasswordResetDialog> {
   final emailController = TextEditingController();
   final currentPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
@@ -553,11 +588,13 @@ class _PasswordResetDialog extends State<PasswordResetDialog> {
 }
 
 class DeleteAccountDialog extends StatefulWidget {
+  const DeleteAccountDialog({super.key});
+
   @override
-  _DeleteAccountDialog createState() => _DeleteAccountDialog();
+  _DeleteAccountDialogState createState() => _DeleteAccountDialogState();
 }
 
-class _DeleteAccountDialog extends State<DeleteAccountDialog> {
+class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
   final passwordController = TextEditingController();
 
   bool _obscurePassword = true;
@@ -661,20 +698,264 @@ class DarkmodeSwitch extends StatefulWidget {
 }
 
 class _DarkmodeSwitchState extends State<DarkmodeSwitch> {
-  bool DarkmodeOn = false;
+  bool darkmodeOn = false;
 
   @override
   Widget build(BuildContext context) {
     return Switch(
       // This bool value toggles the switch.
-      value: DarkmodeOn,
+      value: darkmodeOn,
       activeColor: Color.fromRGBO(111, 167, 204, 1),
       onChanged: (bool value) {
         // This is called when the user toggles the switch.
         setState(() {
-          DarkmodeOn = value;
+          darkmodeOn = value;
         });
       },
+    );
+  }
+}
+
+class MyProfilePage extends StatefulWidget {
+  const MyProfilePage({super.key});
+
+  @override
+  State<MyProfilePage> createState() => _MyProfilePageState();
+}
+
+class _MyProfilePageState extends State<MyProfilePage> {
+  Map<String, dynamic>? profileData;
+  Uint8List? profileImageBytes;
+
+  bool isLoading = true;
+
+  final birthdateController = TextEditingController();
+  final weightController = TextEditingController();
+  final heightController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    fetchProfile();
+  }
+
+  Future<void> fetchProfile() async {
+    final data = await getProfile();
+    setState(() {
+      profileData = data;
+      isLoading = false;
+    });
+    if (data != null && data['photo_url'] != null) {
+      final avatar = await showPrivate(data['photo_url']);
+      setState(() {
+        profileImageBytes = avatar;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (profileData == null) {
+      return Scaffold(
+        body: Center(child: Text('Failed to load profile.')),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('My profile'),
+        backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
+      ),
+      backgroundColor: Color.fromRGBO(207, 228, 242, 1),
+      body: Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Container(
+            width: double.infinity,
+            color: Color.fromRGBO(145, 193, 232, 1), // Light blue background
+            padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            child: Column(
+              children: [
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  radius: 55,
+                  backgroundImage: profileImageBytes != null
+                    ? MemoryImage(profileImageBytes!)
+                    : null,
+                  child: profileImageBytes == null
+                    ? Icon(Icons.person, size: 40)
+                    : null,
+                ),
+                Text(
+                  profileData!['name'] ?? '',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold
+                  )
+                ),
+                SizedBox(height: 4),
+                Text(
+                  profileData!['email'] ?? '',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black54
+                  )
+                ),
+                SizedBox(height: 4),
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Color.fromRGBO(111, 167, 204, 1),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            '${profileData!['weight']}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54
+                            )
+                          ),
+                          Text(
+                            'Weight',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54
+                            )
+                          )
+                        ],
+                      ),
+                      Container(
+                        height: 60, // adjust as needed
+                        width: 1,
+                        color: Colors.white,
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                      ),
+                      Column(
+                        children: [
+                          Text(
+                            '${profileData!['height']}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54
+                            )
+                          ),
+                          Text(
+                            'Height',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54
+                            )
+                          )
+                        ],
+                      ),
+                      Container(
+                        height: 60, // adjust as needed
+                        width: 1,
+                        color: Colors.white,
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                      ),
+                      Column(
+                        children: [
+                          Text(
+                            '${profileData!['birthdate']}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54
+                            )
+                          ),
+                          Text(
+                            'Birthdate',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54
+                            )
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+          SizedBox(height: 10),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TextField(
+                        controller: weightController,
+                        decoration: InputDecoration(labelText: 'Weight'),
+                      ),
+                      SizedBox(height: 14),
+                      TextField(
+                        controller: heightController,
+                        decoration: InputDecoration(labelText: 'Height'),
+                      ),
+                      SizedBox(height: 14),
+                      TextField(
+                        controller: birthdateController,
+                        decoration: InputDecoration(labelText: 'Birthdate'),
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        final picker = ImagePicker();
+                        // final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+                      },
+                      child: const Text('Upload photo'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final weight = weightController.text;
+                        final height = heightController.text;
+                        final birthdate = birthdateController.text;
+
+                        final success = await saveProfile(weight, height, birthdate);
+                        
+                        if (success) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Profile updated successfully')),
+                          );
+                          fetchProfile();
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Profile update failed')),
+                          );
+                        }
+                      },
+                      child: const Text('Update profile'),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+          SizedBox(height: 70),
+        ],
+      )
     );
   }
 }

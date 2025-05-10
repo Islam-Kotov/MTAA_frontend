@@ -98,6 +98,32 @@ Future<bool> resetPassword(String email, String currentPassword, String newPassw
   }
 }
 
+Future<bool> deleteAccount(String password) async {
+  final url = Uri.parse('http://192.168.1.36:8000/api/delete');
+
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('api_token');
+
+  final response = await http.delete(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: jsonEncode({
+      'password': password,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    print('${response.body}');
+    return true;
+  } else {
+    print('${response.body}');
+    return false;
+  }
+}
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -169,7 +195,6 @@ class _ProfileScreen extends State<ProfileScreen> {
                     ? Icon(Icons.person, size: 40)
                     : null,
                 ),
-                SizedBox(width: 16),
                 Text(
                   profileData!['name'] ?? '',
                   style: TextStyle(
@@ -185,6 +210,7 @@ class _ProfileScreen extends State<ProfileScreen> {
                     color: Colors.black54
                   )
                 ),
+                SizedBox(height: 4),
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
                   decoration: BoxDecoration(
@@ -266,82 +292,81 @@ class _ProfileScreen extends State<ProfileScreen> {
               ],
             ),
           ),
-          Expanded(
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 20,
-                children: [
-                  Card(
-                    color: Colors.white,
-                    child: ListTile(
-                      leading: Icon(Icons.person_outline_sharp, size: 32, color: Colors.black),
-                      title: Text(
-                        'My profile',
-                        style: TextStyle(
-                          fontSize: 22,
-                          color: Colors.black,
-                        ),
+          SizedBox(height: 10),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 20,
+              children: [
+                Card(
+                  color: Colors.white,
+                  child: ListTile(
+                    leading: Icon(Icons.person_outline_sharp, size: 32, color: Colors.black),
+                    title: Text(
+                      'My profile',
+                      style: TextStyle(
+                        fontSize: 22,
+                        color: Colors.black,
                       ),
-                      trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
-                      onTap: () {
-                        
-                      },
-                    )
-                  ),
-                  Card(
-                    color: Colors.white,
-                    child: ListTile(
-                      leading: Icon(Icons.settings, size: 32, color: Colors.black),
-                      title: Text(
-                        'Settings',
-                        style: TextStyle(
-                          fontSize: 22,
-                          color: Colors.black,
-                        ),
+                    ),
+                    trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                    onTap: () {
+                      
+                    },
+                  )
+                ),
+                Card(
+                  color: Colors.white,
+                  child: ListTile(
+                    leading: Icon(Icons.settings, size: 32, color: Colors.black),
+                    title: Text(
+                      'Settings',
+                      style: TextStyle(
+                        fontSize: 22,
+                        color: Colors.black,
                       ),
-                      trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
-                      onTap: () {
-                          Navigator.push(
+                    ),
+                    trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                    onTap: () {
+                        Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SettingsPage()),
+                      );
+                    },
+                  )
+                ),
+                Card(
+                  color: Colors.white,
+                  child: ListTile(
+                    leading: Icon(Icons.logout_sharp, size: 32, color: Colors.black),
+                    title: Text(
+                      'Logout',
+                      style: TextStyle(
+                        fontSize: 22,
+                        color: Colors.black,
+                      ),
+                    ),
+                    trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                    onTap: () async {
+                      final success = await logout();
+
+                      if (!mounted) return; // Prevent using context if widget is disposed
+
+                      if (success) {
+                        Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => SettingsPage()),
+                          MaterialPageRoute(builder: (context) => const AuthorizationScreen()),
                         );
-                      },
-                    )
-                  ),
-                  Card(
-                    color: Colors.white,
-                    child: ListTile(
-                      leading: Icon(Icons.logout_sharp, size: 32, color: Colors.black),
-                      title: Text(
-                        'Logout',
-                        style: TextStyle(
-                          fontSize: 22,
-                          color: Colors.black,
-                        ),
-                      ),
-                      trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
-                      onTap: () async {
-                        final success = await logout();
-
-                        if (!mounted) return; // Prevent using context if widget is disposed
-
-                        if (success) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => const AuthorizationScreen()),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Logout failed')),
-                          );
-                        }
-                      },
-                    )
-                  ),
-                ],
-              ),
-            )
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Logout failed')),
+                        );
+                      }
+                    },
+                  )
+                ),
+              ],
+            ),
           ),
         ],
       )
@@ -360,63 +385,69 @@ class SettingsPage extends StatelessWidget {
         title: const Text('Settings'),
         backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
       ),
-      body: Expanded(
-        child: Column(
-          children: [
-            ListTile(
-              leading: Icon(Icons.notifications, size: 32, color: Colors.black),
-              title: Text(
-                'Notifications',
-                style: TextStyle(
-                  fontSize: 22,
-                  color: Colors.black,
-                ),
+      body: Column(
+        children: [
+          ListTile(
+            leading: Icon(Icons.notifications, size: 32, color: Colors.black),
+            title: Text(
+              'Notifications',
+              style: TextStyle(
+                fontSize: 22,
+                color: Colors.black,
               ),
-              trailing: NotificationsSwitch(),
             ),
-            ListTile(
-              leading: Icon(Icons.dark_mode_outlined, size: 32, color: Colors.black),
-              title: Text(
-                'Dark mode',
-                style: TextStyle(
-                  fontSize: 22,
-                  color: Colors.black,
-                ),
+            trailing: NotificationsSwitch(),
+          ),
+          ListTile(
+            leading: Icon(Icons.dark_mode_outlined, size: 32, color: Colors.black),
+            title: Text(
+              'Dark mode',
+              style: TextStyle(
+                fontSize: 22,
+                color: Colors.black,
               ),
-              trailing: DarkmodeSwitch(),
             ),
-            ListTile(
-              leading: Icon(Icons.password_sharp, size: 32, color: Colors.black),
-              title: Text(
-                'Reset the password',
-                style: TextStyle(
-                  fontSize: 22,
-                  color: Colors.black,
-                ),
+            trailing: DarkmodeSwitch(),
+          ),
+          ListTile(
+            leading: Icon(Icons.password_sharp, size: 32, color: Colors.black),
+            title: Text(
+              'Reset the password',
+              style: TextStyle(
+                fontSize: 22,
+                color: Colors.black,
               ),
-              trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
-              onTap: () async {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return PasswordResetDialog();
-                  },
-                );
-              },
             ),
-            ListTile(
-              leading: Icon(Icons.delete_outline_sharp, size: 32, color: Colors.black),
-              title: Text(
-                'Delete account',
-                style: TextStyle(
-                  fontSize: 22,
-                  color: Colors.black,
-                ),
+            trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+            onTap: () async {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return PasswordResetDialog();
+                },
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.delete_outline_sharp, size: 32, color: Colors.black),
+            title: Text(
+              'Delete account',
+              style: TextStyle(
+                fontSize: 22,
+                color: Colors.black,
               ),
-              trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
             ),
-          ],
-        )
+            trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+            onTap: () async {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return DeleteAccountDialog();
+                },
+              );
+            },
+          ),
+        ],
       )
     );
   }
@@ -515,6 +546,81 @@ class _PasswordResetDialog extends State<PasswordResetDialog> {
             }
           },
           child: const Text('Reset'),
+        ),
+      ],
+    );
+  }
+}
+
+class DeleteAccountDialog extends StatefulWidget {
+  @override
+  _DeleteAccountDialog createState() => _DeleteAccountDialog();
+}
+
+class _DeleteAccountDialog extends State<DeleteAccountDialog> {
+  final passwordController = TextEditingController();
+
+  bool _obscurePassword = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Reset Password'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: passwordController,
+              obscureText: _obscurePassword,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            final password = passwordController.text;
+
+            final success = await deleteAccount(password);
+
+            if (!mounted) return; // Prevent using context if widget is disposed
+            
+            if (success) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Account deleted successfully')),
+              );
+              // Navigator.of(context).pop(); // Close the dialog
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const AuthorizationScreen()),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Account deletion failed')),
+              );
+            }
+          },
+          child: const Text('Delete'),
         ),
       ],
     );

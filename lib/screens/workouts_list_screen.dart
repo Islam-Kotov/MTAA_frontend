@@ -36,7 +36,7 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
 
   Future<void> fetchWorkouts() async {
     final uri = Uri.parse(
-        'http://10.0.2.2:8000/api/workouts?category=${Uri.encodeComponent(widget.categoryName)}');
+        'http://192.168.1.36:8000/api/workouts?category=${Uri.encodeComponent(widget.categoryName)}');
     log('📡 Fetching workouts from: $uri');
 
     try {

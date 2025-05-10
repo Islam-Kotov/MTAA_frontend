@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:developer';
 
+import 'predefined_workout_detail_screen.dart';
+
 class PredefinedLevelsScreen extends StatefulWidget {
   const PredefinedLevelsScreen({super.key});
 
@@ -14,6 +16,12 @@ class _PredefinedLevelsScreenState extends State<PredefinedLevelsScreen> {
   List workouts = [];
   String? selectedLevel;
   bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchWorkouts('Beginner');
+  }
 
   Future<void> fetchWorkouts(String level) async {
     setState(() {
@@ -29,20 +37,20 @@ class _PredefinedLevelsScreenState extends State<PredefinedLevelsScreen> {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final fixed = data.map((w) {
-          w['image'] = (w['image'] as String)
-              .replaceAll('localhost', '192.168.1.36:8000')
-              .replaceAll('127.0.0.1', '192.168.1.36:8000');
-          return w;
-        }).toList();
         setState(() {
-          workouts = fixed;
+          workouts = data;
         });
       } else {
         log('❌ Failed to load workouts: ${response.statusCode}', error: response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load workouts: ${response.statusCode}')),
+        );
       }
     } catch (e) {
       log('❗ Error loading workouts', error: e);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error loading workouts')),
+      );
     }
 
     setState(() => isLoading = false);
@@ -86,54 +94,41 @@ class _PredefinedLevelsScreenState extends State<PredefinedLevelsScreen> {
             ),
           const SizedBox(height: 12),
           Expanded(
-            child: isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : workouts.isEmpty
-                ? const Center(child: Text('No workouts found for this level.'))
-                : ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: workouts.length,
-              itemBuilder: (context, index) {
-                final workout = workouts[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
-                  elevation: 3,
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(14),
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        workout['image'],
-                        width: 60,
-                        height: 60,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          width: 60,
-                          height: 60,
-                          color: Colors.grey.shade300,
-                          child: const Icon(Icons.image_not_supported),
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      workout['title'] ?? 'No title',
-                      style: const TextStyle(
-                          fontSize: 17, fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: Text(
-                      '${workout['duration']} | ${workout['calories']} | ${workout['exercise_count']} exercises',
-                      style: const TextStyle(
-                          fontSize: 13, color: Colors.black54),
-                    ),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 400),
+              child: isLoading
+                  ? const Center(
+                key: ValueKey('loading'),
+                child: CircularProgressIndicator(),
+              )
+                  : workouts.isEmpty
+                  ? const Center(
+                key: ValueKey('empty'),
+                child: Text('No workouts found for this level.'),
+              )
+                  : ListView.builder(
+                key: ValueKey(selectedLevel),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                itemCount: workouts.length,
+                itemBuilder: (context, index) {
+                  final workout = workouts[index];
+                  return WorkoutCard(
+                    workout: workout,
                     onTap: () {
                       log('📦 Tapped workout ID: ${workout['id']}');
-                      // TODO: перейти на WorkoutDetail
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PredefinedWorkoutDetailScreen(
+                            workoutId: workout['id'],
+                            imageUrl: '', // imageUrl не используется
+                          ),
+                        ),
+                      );
                     },
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ],
@@ -157,6 +152,57 @@ class _PredefinedLevelsScreenState extends State<PredefinedLevelsScreen> {
       child: Text(
         label,
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+}
+
+class WorkoutCard extends StatelessWidget {
+  final Map workout;
+  final VoidCallback onTap;
+
+  const WorkoutCard({required this.workout, required this.onTap, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(milliseconds: 400),
+      tween: Tween(begin: 0.0, end: 1.0),
+      builder: (context, value, child) => Opacity(
+        opacity: value,
+        child: Transform.translate(
+          offset: Offset(0, 20 * (1 - value)),
+          child: child,
+        ),
+      ),
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        elevation: 3,
+        child: ListTile(
+          contentPadding: const EdgeInsets.all(14),
+          leading: Hero(
+            tag: 'predefined-workout-image-${workout['id']}',
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.blueGrey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.fitness_center, size: 32, color: Colors.black54),
+            ),
+          ),
+          title: Text(
+            workout['title'] ?? 'No title',
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+          ),
+          subtitle: Text(
+            '${workout['duration']} | ${workout['calories']} | ${workout['exercise_count']} exercises',
+            style: const TextStyle(fontSize: 13, color: Colors.black54),
+          ),
+          onTap: onTap,
+        ),
       ),
     );
   }

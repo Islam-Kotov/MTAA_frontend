@@ -14,8 +14,8 @@ class _HomeScreen extends State<HomeScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    Center(child: Text('My Plan')),
-    WorkoutCategoriesScreen(), // ← теперь работает!
+    MyPlanScreen(),
+    WorkoutCategoriesScreen(),
     Center(child: Text('Community')),
     ProfileScreen(),
   ];

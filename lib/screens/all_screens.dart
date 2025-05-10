@@ -7,4 +7,5 @@ export 'workouts_list_screen.dart';
 export 'workout_detail_screen.dart';
 export 'my_plan_screen.dart';
 export 'predefined_levels_screen.dart';
+export 'predefined_workout_detail_screen.dart';
 

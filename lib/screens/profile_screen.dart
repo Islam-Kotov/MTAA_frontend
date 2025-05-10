@@ -25,7 +25,7 @@ Future<Uint8List> showPrivate(String photo_url) async {
 }
 
 Future<Map<String, dynamic>?> getProfile() async {
-  final url = Uri.parse('http://10.0.2.2:8000/api/profile');
+  final url = Uri.parse('http://192.168.1.36:8000/api/profile');
 
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('api_token');
@@ -48,7 +48,7 @@ Future<Map<String, dynamic>?> getProfile() async {
 }
 
 Future<bool> logout() async {
-  final url = Uri.parse('http://10.0.2.2:8000/api/logout');
+  final url = Uri.parse('http://192.168.1.36:8000/api/logout');
 
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('api_token');
@@ -101,7 +101,6 @@ class _ProfileScreen extends State<ProfileScreen> {
         profileImageBytes = avatar;
       });
     }
-    
   }
 
   @override
@@ -119,27 +118,22 @@ class _ProfileScreen extends State<ProfileScreen> {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profile'),
+        backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
+      ),
+      backgroundColor: Color.fromRGBO(207, 228, 242, 1),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text(
-              'Profile',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          ),
           Container(
             width: double.infinity,
-            color: Color.fromRGBO(200, 230, 255, 1), // Light blue background
+            color: Color.fromRGBO(145, 193, 232, 1), // Light blue background
             padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-            child: Row(
+            child: Column(
               children: [
                 CircleAvatar(
-                  radius: 35,
+                  backgroundColor: Colors.white,
+                  radius: 55,
                   backgroundImage: profileImageBytes != null
                     ? MemoryImage(profileImageBytes!)
                     : null,
@@ -148,25 +142,98 @@ class _ProfileScreen extends State<ProfileScreen> {
                     : null,
                 ),
                 SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      profileData!['name'] ?? '',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold
-                      )
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      profileData!['email'] ?? '',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black54
-                      )
-                    ),
-                  ],
+                Text(
+                  profileData!['name'] ?? '',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold
+                  )
+                ),
+                SizedBox(height: 4),
+                Text(
+                  profileData!['email'] ?? '',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black54
+                  )
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Color.fromRGBO(111, 167, 204, 1),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            '${profileData!['weight']}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54
+                            )
+                          ),
+                          Text(
+                            'Weight',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54
+                            )
+                          )
+                        ],
+                      ),
+                      Container(
+                        height: 60, // adjust as needed
+                        width: 1,
+                        color: Colors.white,
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                      ),
+                      Column(
+                        children: [
+                          Text(
+                            '${profileData!['height']}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54
+                            )
+                          ),
+                          Text(
+                            'Height',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54
+                            )
+                          )
+                        ],
+                      ),
+                      Container(
+                        height: 60, // adjust as needed
+                        width: 1,
+                        color: Colors.white,
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                      ),
+                      Column(
+                        children: [
+                          Text(
+                            '${profileData!['birthdate']}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54
+                            )
+                          ),
+                          Text(
+                            'Birthdate',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54
+                            )
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
                 )
               ],
             ),
@@ -179,7 +246,7 @@ class _ProfileScreen extends State<ProfileScreen> {
                 children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromRGBO(57, 132, 173, 1),
+                      backgroundColor: Colors.white,
                       fixedSize: Size(286, 68),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10))
@@ -197,13 +264,17 @@ class _ProfileScreen extends State<ProfileScreen> {
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromRGBO(57, 132, 173, 1),
+                      backgroundColor: Colors.white,
                       fixedSize: Size(286, 68),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10))
                       )
                     ),
                     onPressed: () async {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SettingsPage()),
+                      );
                     },
                     child: const Text(
                       'Settings',
@@ -215,7 +286,7 @@ class _ProfileScreen extends State<ProfileScreen> {
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromRGBO(57, 132, 173, 1),
+                      backgroundColor: Colors.white,
                       fixedSize: Size(286, 68),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10))
@@ -236,7 +307,6 @@ class _ProfileScreen extends State<ProfileScreen> {
                           const SnackBar(content: Text('Logout failed')),
                         );
                       }
-
                     },
                     child: const Text(
                       'Logout',
@@ -252,6 +322,18 @@ class _ProfileScreen extends State<ProfileScreen> {
           ),
         ],
       )
+    );
+  }
+}
+
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Settings')),
+      body: const Center(child: Text('Welcome to Settings')),
     );
   }
 }

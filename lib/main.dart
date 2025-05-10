@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'screens/all_screens.dart';
 
@@ -10,11 +11,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return MaterialApp(
-    //   home: const AuthorizationScreen(),
-    // );
     return MaterialApp(
-      home: AuthorizationScreen(),
+      home: const AuthorizationScreen(),
     );
+    // return MaterialApp(
+    //   home: HomeScreen(),
+    // );
   }
 }

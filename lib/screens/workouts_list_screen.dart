@@ -22,7 +22,7 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
 
   Future<void> fetchWorkouts() async {
     final uri = Uri.parse(
-        'http://10.0.2.2:8000/api/workouts?category=${Uri.encodeComponent(widget.categoryName)}');
+        'http://192.168.1.36:8000/api/workouts?category=${Uri.encodeComponent(widget.categoryName)}');
     print('Fetching workouts from: $uri'); // логируем URL
 
     final response = await http.get(uri);
@@ -39,8 +39,8 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
         workouts = data;
       });
     } else {
-      print('Ошибка загрузки упражнений: ${response.statusCode}');
-      print('Ответ сервера: ${response.body}');
+      print('Error loading workouts: ${response.statusCode}');
+      print('Server response: ${response.body}');
     }
   }
 
@@ -69,8 +69,8 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
                 imageUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  print('Ошибка загрузки изображения: $imageUrl');
-                  print('Ошибка: $error');
+                  print('Error loading the image: $imageUrl');
+                  print('Error: $error');
                   return const Icon(Icons.broken_image);
                 },
               ),

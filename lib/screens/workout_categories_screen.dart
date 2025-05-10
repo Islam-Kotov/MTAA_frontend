@@ -20,7 +20,7 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
   }
 
   Future<void> fetchCategories() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/categories'));
+    final response = await http.get(Uri.parse('http://192.168.1.36:8000/api/categories'));
     if (response.statusCode == 200) {
       setState(() {
         categories = jsonDecode(response.body);

@@ -32,17 +32,12 @@ class _PredefinedWorkoutDetailScreenState
   Future<void> fetchWorkoutDetail() async {
     setState(() => isLoading = true);
 
-    final uri = Uri.parse('http://192.168.1.36:8000/api/predefined-workouts/${widget.workoutId}');
+    final uri = Uri.parse(
+        'http://192.168.1.36:8000/api/predefined-workouts/${widget.workoutId}');
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
-        // Debug: log each image
-        for (var ex in data['exercises']) {
-          log('🖼️ Exercise image URL: ${ex['image']}');
-        }
-
         setState(() {
           workout = data;
           isLoading = false;
@@ -108,7 +103,8 @@ class _PredefinedWorkoutDetailScreenState
             const SizedBox(height: 24),
             const Text(
               '💪 Benefits:',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style:
+              TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
@@ -118,7 +114,8 @@ class _PredefinedWorkoutDetailScreenState
             const SizedBox(height: 32),
             const Text(
               '📋 Exercises:',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style:
+              TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             ..._buildExercisesList(workout!['exercises']),
@@ -189,18 +186,15 @@ class _PredefinedWorkoutDetailScreenState
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                exercise['image'] ?? '',
+              child: exercise['image'] != null
+                  ? Image.network(
+                exercise['image'],
                 width: 60,
                 height: 60,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  width: 60,
-                  height: 60,
-                  color: Colors.grey.shade300,
-                  child: const Icon(Icons.image_not_supported),
-                ),
-              ),
+                errorBuilder: (_, __, ___) => _fallbackIcon(),
+              )
+                  : _fallbackIcon(),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -208,14 +202,14 @@ class _PredefinedWorkoutDetailScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    exercise['name'],
+                    exercise['name'] ?? 'Unnamed',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   Text(
-                    exercise['reps_sets'],
+                    exercise['reps_sets'] ?? '-',
                     style: const TextStyle(
                       fontSize: 14,
                       color: Colors.black54,
@@ -223,13 +217,8 @@ class _PredefinedWorkoutDetailScreenState
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    exercise['description'],
+                    exercise['description'] ?? '',
                     style: const TextStyle(fontSize: 14),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Image URL: ${exercise['image'] ?? 'NULL'}',
-                    style: const TextStyle(fontSize: 12, color: Colors.red),
                   ),
                 ],
               ),
@@ -239,4 +228,11 @@ class _PredefinedWorkoutDetailScreenState
       );
     }).toList();
   }
+
+  Widget _fallbackIcon() => Container(
+    width: 60,
+    height: 60,
+    color: Colors.grey.shade300,
+    child: const Icon(Icons.image_not_supported),
+  );
 }

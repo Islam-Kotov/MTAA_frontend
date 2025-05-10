@@ -37,6 +37,7 @@ class _HomeScreen extends State<HomeScreen> {
         backgroundColor: Color.fromRGBO(57, 132, 173, 1),
         unselectedItemColor: Color.fromRGBO(0, 0, 0, 1),
         selectedItemColor: Color.fromRGBO(76, 21, 152, 1),
+        iconSize: 30,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.assignment_outlined),

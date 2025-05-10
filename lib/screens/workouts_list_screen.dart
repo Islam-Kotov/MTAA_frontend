@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:developer';
+
 import 'workout_detail_screen.dart';
 
 class WorkoutsListScreen extends StatefulWidget {
@@ -16,9 +18,11 @@ class WorkoutsListScreen extends StatefulWidget {
 class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
   List workouts = [];
   List filteredWorkouts = [];
+  Set<int> alreadyAdded = {};
+  String? apiToken;
+  String? selectedFilter;
   bool isLoading = true;
   bool isFiltering = false;
-  String? selectedFilter;
 
   final List<String> filters = [
     'for biceps',
@@ -31,56 +35,168 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
   @override
   void initState() {
     super.initState();
-    fetchWorkouts();
+    loadTokenAndFetch();
+  }
+
+  Future<void> loadTokenAndFetch() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('api_token');
+    setState(() => apiToken = token);
+    await Future.wait([fetchWorkouts(), fetchUserPlanIds()]);
+  }
+
+  Future<void> fetchUserPlanIds() async {
+    if (apiToken == null) return;
+    final uri = Uri.parse('http://192.168.1.36:8000/api/plan');
+    try {
+      final response = await http.get(uri, headers: {
+        'Authorization': 'Bearer $apiToken',
+        'Content-Type': 'application/json',
+      });
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final ids = data.map<int>((e) => e['workout_id'] as int).toSet();
+        setState(() => alreadyAdded = ids);
+      } else {
+        log('⚠️ Failed to fetch plan: ${response.statusCode}');
+      }
+    } catch (e) {
+      log('❗ Error fetching user plan', error: e);
+    }
   }
 
   Future<void> fetchWorkouts() async {
     final uri = Uri.parse(
         'http://192.168.1.36:8000/api/workouts?category=${Uri.encodeComponent(widget.categoryName)}');
-    log('📡 Fetching workouts from: $uri');
-
     try {
-      final response = await http.get(uri);
+      final response = await http.get(uri, headers: {
+        'Authorization': 'Bearer $apiToken',
+        'Content-Type': 'application/json',
+      });
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        log('✅ Workouts fetched: ${data.length} items');
         setState(() {
           workouts = data;
           filteredWorkouts = data;
           isLoading = false;
         });
       } else {
-        log('❌ Server error: ${response.statusCode}', error: response.body);
+        log('❌ Server error: ${response.statusCode}');
         setState(() => isLoading = false);
       }
     } catch (e) {
-      log('❗ Exception while fetching workouts', error: e);
+      log('❗ Error fetching workouts', error: e);
       setState(() => isLoading = false);
     }
   }
 
   void applyFilter(String selected) {
     String? type = selected == '__clear__' ? null : selected;
-
     setState(() {
       selectedFilter = type;
       isFiltering = true;
-      filteredWorkouts = [];
     });
 
     Future.delayed(const Duration(milliseconds: 50), () {
       setState(() {
-        if (type == null) {
-          filteredWorkouts = workouts;
-        } else {
-          filteredWorkouts = workouts
-              .where((w) => (w['exercise_type']?.toLowerCase() ?? '')
-              .contains(type.toLowerCase()))
-              .toList();
-        }
+        filteredWorkouts = type == null
+            ? workouts
+            : workouts
+            .where((w) =>
+            (w['exercise_type']?.toLowerCase() ?? '')
+                .contains(type.toLowerCase()))
+            .toList();
         isFiltering = false;
       });
     });
+  }
+
+  void showAddDialog(int workoutId) {
+    final setsController = TextEditingController();
+    final repsController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Add to My Plan'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: setsController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Sets (1–100)'),
+            ),
+            TextField(
+              controller: repsController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Repetitions (1–100)'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final sets = int.tryParse(setsController.text);
+              final reps = int.tryParse(repsController.text);
+
+              if (sets == null || reps == null || sets < 1 || sets > 100 || reps < 1 || reps > 100) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter values between 1 and 100')),
+                );
+                return;
+              }
+
+              Navigator.pop(context);
+              addExerciseToPlan(workoutId, sets, reps);
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> addExerciseToPlan(int workoutId, int sets, int reps) async {
+    final uri = Uri.parse('http://192.168.1.36:8000/api/plan/add');
+
+    try {
+      final response = await http.post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $apiToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'workout_id': workoutId,
+          'sets': sets,
+          'repetitions': reps,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        await fetchUserPlanIds();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('✅ Exercise added to your plan')),
+        );
+      } else {
+        log('❌ Failed to add: ${response.statusCode}', error: response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to add exercise')),
+        );
+      }
+    } catch (e) {
+      log('❗ Error adding exercise', error: e);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error adding exercise')),
+      );
+    }
   }
 
   @override
@@ -97,15 +213,11 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
             tooltip: 'Filter by type',
             onSelected: applyFilter,
             itemBuilder: (context) => [
-              ...filters.map((type) => PopupMenuItem(
-                value: type,
-                child: Text(type),
-              )),
+              ...filters.map((type) =>
+                  PopupMenuItem(value: type, child: Text(type))),
               const PopupMenuDivider(),
               const PopupMenuItem(
-                value: '__clear__',
-                child: Text('Clear filter'),
-              ),
+                  value: '__clear__', child: Text('Clear filter')),
             ],
           ),
         ],
@@ -154,15 +266,14 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
                     ),
                   ),
                   child: Card(
-                    margin: const EdgeInsets.only(bottom: 16),
+                    margin:
+                    const EdgeInsets.only(bottom: 16),
                     elevation: 4,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(14),
                       onTap: () {
-                        log('🟢 Tapped workout ID: ${workout['id']}');
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -173,6 +284,7 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
                           ),
                         );
                       },
+                      borderRadius: BorderRadius.circular(14),
                       child: ListTile(
                         contentPadding:
                         const EdgeInsets.all(14),
@@ -187,24 +299,22 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
                               width: 60,
                               height: 60,
                               fit: BoxFit.cover,
-                              errorBuilder: (context,
-                                  error, stackTrace) {
-                                log('⚠️ Image load error: $imageUrl',
-                                    error: error);
-                                return Container(
-                                  width: 60,
-                                  height: 60,
-                                  color: Colors
-                                      .grey.shade300,
-                                  child: const Icon(Icons
-                                      .broken_image),
-                                );
-                              },
+                              errorBuilder:
+                                  (_, __, ___) =>
+                                  Container(
+                                    width: 60,
+                                    height: 60,
+                                    color: Colors
+                                        .grey.shade300,
+                                    child: const Icon(Icons
+                                        .image_not_supported),
+                                  ),
                             )
                                 : Container(
                               width: 60,
                               height: 60,
-                              color: Colors.grey.shade300,
+                              color:
+                              Colors.grey.shade300,
                               child: const Icon(Icons
                                   .image_not_supported),
                             ),
@@ -213,17 +323,28 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
                         title: Text(
                           workout['exercise_name'] ?? 'Unnamed',
                           style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                          ),
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600),
                         ),
                         subtitle: Text(
                           workout['exercise_type'] ?? '',
                           style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.black54,
+                              fontSize: 14,
+                              color: Colors.black54),
+                        ),
+                        trailing: IconButton(
+                          icon: Icon(
+                            alreadyAdded.contains(workout['id'])
+                                ? Icons.check_circle
+                                : Icons.add_circle,
+                            size: 32,
+                            color:
+                            alreadyAdded.contains(workout['id'])
+                                ? Colors.green
+                                : Colors.blue,
                           ),
+                          onPressed: () =>
+                              showAddDialog(workout['id']),
                         ),
                       ),
                     ),

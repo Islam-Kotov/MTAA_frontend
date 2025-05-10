@@ -70,6 +70,34 @@ Future<bool> logout() async {
   }
 }
 
+Future<bool> resetPassword(String email, String currentPassword, String newPassword) async {
+  final url = Uri.parse('http://192.168.1.36:8000/api/reset-password');
+
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('api_token');
+
+  final response = await http.post(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: jsonEncode({
+      'email': email,
+      'old_password': currentPassword,
+      'new_password': newPassword,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    print('${response.body}');
+    return true;
+  } else {
+    print('${response.body}');
+    return false;
+  }
+}
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -242,78 +270,73 @@ class _ProfileScreen extends State<ProfileScreen> {
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                spacing: 10,
+                spacing: 20,
                 children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      fixedSize: Size(286, 68),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10))
-                      )
-                    ),
-                    onPressed: () async {
-                    },
-                    child: const Text(
-                      'My profile',
-                      style: TextStyle(
-                        color:Color.fromRGBO(0, 0, 0, 1),
-                        fontSize: 24
+                  Card(
+                    color: Colors.white,
+                    child: ListTile(
+                      leading: Icon(Icons.person_outline_sharp, size: 32, color: Colors.black),
+                      title: Text(
+                        'My profile',
+                        style: TextStyle(
+                          fontSize: 22,
+                          color: Colors.black,
+                        ),
                       ),
+                      trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                      onTap: () {
+                        
+                      },
                     )
                   ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      fixedSize: Size(286, 68),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10))
-                      )
-                    ),
-                    onPressed: () async {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const SettingsPage()),
-                      );
-                    },
-                    child: const Text(
-                      'Settings',
-                      style: TextStyle(
-                        color:Color.fromRGBO(0, 0, 0, 1),
-                        fontSize: 24
+                  Card(
+                    color: Colors.white,
+                    child: ListTile(
+                      leading: Icon(Icons.settings, size: 32, color: Colors.black),
+                      title: Text(
+                        'Settings',
+                        style: TextStyle(
+                          fontSize: 22,
+                          color: Colors.black,
+                        ),
                       ),
-                    )
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      fixedSize: Size(286, 68),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10))
-                      )
-                    ),
-                    onPressed: () async {
-                      final success = await logout();
-
-                      if (!mounted) return; // Prevent using context if widget is disposed
-
-                      if (success) {
-                        Navigator.pushReplacement(
+                      trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                      onTap: () {
+                          Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const AuthorizationScreen()),
+                          MaterialPageRoute(builder: (context) => SettingsPage()),
                         );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Logout failed')),
-                        );
-                      }
-                    },
-                    child: const Text(
-                      'Logout',
-                      style: TextStyle(
-                        color:Color.fromRGBO(0, 0, 0, 1),
-                        fontSize: 24
+                      },
+                    )
+                  ),
+                  Card(
+                    color: Colors.white,
+                    child: ListTile(
+                      leading: Icon(Icons.logout_sharp, size: 32, color: Colors.black),
+                      title: Text(
+                        'Logout',
+                        style: TextStyle(
+                          fontSize: 22,
+                          color: Colors.black,
+                        ),
                       ),
+                      trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                      onTap: () async {
+                        final success = await logout();
+
+                        if (!mounted) return; // Prevent using context if widget is disposed
+
+                        if (success) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => const AuthorizationScreen()),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Logout failed')),
+                          );
+                        }
+                      },
                     )
                   ),
                 ],
@@ -332,8 +355,220 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: const Center(child: Text('Welcome to Settings')),
+      backgroundColor: const Color.fromRGBO(207, 228, 242, 1),
+      appBar: AppBar(
+        title: const Text('Settings'),
+        backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
+      ),
+      body: Expanded(
+        child: Column(
+          children: [
+            ListTile(
+              leading: Icon(Icons.notifications, size: 32, color: Colors.black),
+              title: Text(
+                'Notifications',
+                style: TextStyle(
+                  fontSize: 22,
+                  color: Colors.black,
+                ),
+              ),
+              trailing: NotificationsSwitch(),
+            ),
+            ListTile(
+              leading: Icon(Icons.dark_mode_outlined, size: 32, color: Colors.black),
+              title: Text(
+                'Dark mode',
+                style: TextStyle(
+                  fontSize: 22,
+                  color: Colors.black,
+                ),
+              ),
+              trailing: DarkmodeSwitch(),
+            ),
+            ListTile(
+              leading: Icon(Icons.password_sharp, size: 32, color: Colors.black),
+              title: Text(
+                'Reset the password',
+                style: TextStyle(
+                  fontSize: 22,
+                  color: Colors.black,
+                ),
+              ),
+              trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+              onTap: () async {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return PasswordResetDialog();
+                  },
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.delete_outline_sharp, size: 32, color: Colors.black),
+              title: Text(
+                'Delete account',
+                style: TextStyle(
+                  fontSize: 22,
+                  color: Colors.black,
+                ),
+              ),
+              trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+            ),
+          ],
+        )
+      )
+    );
+  }
+}
+
+class PasswordResetDialog extends StatefulWidget {
+  @override
+  _PasswordResetDialog createState() => _PasswordResetDialog();
+}
+
+class _PasswordResetDialog extends State<PasswordResetDialog> {
+  final emailController = TextEditingController();
+  final currentPasswordController = TextEditingController();
+  final newPasswordController = TextEditingController();
+
+  bool _obscureCurrentPassword = true;
+  bool _obscureNewPassword = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Reset Password'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+              ),
+            ),
+            TextField(
+              controller: currentPasswordController,
+              obscureText: _obscureCurrentPassword,
+              decoration: InputDecoration(
+                labelText: 'Current Password',
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureCurrentPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureCurrentPassword = !_obscureCurrentPassword;
+                    });
+                  },
+                ),
+              ),
+            ),
+            TextField(
+              controller: newPasswordController,
+              obscureText: _obscureNewPassword,
+              decoration: InputDecoration(
+                labelText: 'New Password',
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureNewPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureNewPassword = !_obscureNewPassword;
+                    });
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            final email = emailController.text;
+            final currentPassword = currentPasswordController.text;
+            final newPassword = newPasswordController.text;
+
+            final success = await resetPassword(email, currentPassword, newPassword);
+            
+            if (success) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Password reset successfully')),
+              );
+              Navigator.of(context).pop(); // Close the dialog
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Password reset failed')),
+              );
+            }
+          },
+          child: const Text('Reset'),
+        ),
+      ],
+    );
+  }
+}
+
+class NotificationsSwitch extends StatefulWidget {
+  const NotificationsSwitch({super.key});
+
+  @override
+  State<NotificationsSwitch> createState() => _NotificationsSwitchState();
+}
+
+class _NotificationsSwitchState extends State<NotificationsSwitch> {
+  bool notificationsOn = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Switch(
+      // This bool value toggles the switch.
+      value: notificationsOn,
+      activeColor: Color.fromRGBO(111, 167, 204, 1),
+      onChanged: (bool value) {
+        // This is called when the user toggles the switch.
+        setState(() {
+          notificationsOn = value;
+        });
+      },
+    );
+  }
+}
+
+class DarkmodeSwitch extends StatefulWidget {
+  const DarkmodeSwitch({super.key});
+
+  @override
+  State<DarkmodeSwitch> createState() => _DarkmodeSwitchState();
+}
+
+class _DarkmodeSwitchState extends State<DarkmodeSwitch> {
+  bool DarkmodeOn = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Switch(
+      // This bool value toggles the switch.
+      value: DarkmodeOn,
+      activeColor: Color.fromRGBO(111, 167, 204, 1),
+      onChanged: (bool value) {
+        // This is called when the user toggles the switch.
+        setState(() {
+          DarkmodeOn = value;
+        });
+      },
     );
   }
 }

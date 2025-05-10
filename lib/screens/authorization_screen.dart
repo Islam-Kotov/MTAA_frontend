@@ -45,6 +45,8 @@ class _AuthorizationScreen extends State<AuthorizationScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  bool _obscurePassword = true;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -107,7 +109,8 @@ class _AuthorizationScreen extends State<AuthorizationScreen> {
                           height: 68,
                           child: TextField(
                             controller: _passwordController,
-                            decoration: const InputDecoration(
+                            obscureText: _obscurePassword,
+                            decoration: InputDecoration(
                               contentPadding: EdgeInsets.symmetric(vertical: 22),
                               border: OutlineInputBorder(
                                 borderSide: BorderSide.none,
@@ -116,6 +119,18 @@ class _AuthorizationScreen extends State<AuthorizationScreen> {
                               filled: true,
                               fillColor: Color.fromRGBO(255, 255, 255, 1),
                               hintText: 'Enter password...',
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
+                                },
+                              ),
                             ),
                             textAlign: TextAlign.center,
                           )

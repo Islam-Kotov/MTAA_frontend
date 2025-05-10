@@ -50,6 +50,9 @@ class _RegistrationScreen extends State<RegistrationScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _passwordConfirmationController = TextEditingController();
 
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -129,7 +132,8 @@ class _RegistrationScreen extends State<RegistrationScreen> {
                           height: 68,
                           child: TextField(
                             controller: _passwordController,
-                            decoration: const InputDecoration(
+                            obscureText: _obscurePassword,
+                            decoration: InputDecoration(
                               contentPadding: EdgeInsets.symmetric(vertical: 22),
                               border: OutlineInputBorder(
                                 borderSide: BorderSide.none,
@@ -138,6 +142,18 @@ class _RegistrationScreen extends State<RegistrationScreen> {
                               filled: true,
                               fillColor: Color.fromRGBO(255, 255, 255, 1),
                               hintText: 'Enter password...',
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
+                                },
+                              ),
                             ),
                             textAlign: TextAlign.center,
                           )
@@ -146,7 +162,8 @@ class _RegistrationScreen extends State<RegistrationScreen> {
                           height: 68,
                           child: TextField(
                             controller: _passwordConfirmationController,
-                            decoration: const InputDecoration(
+                            obscureText: _obscureConfirmPassword,
+                            decoration: InputDecoration(
                               contentPadding: EdgeInsets.symmetric(vertical: 22),
                               border: OutlineInputBorder(
                                 borderSide: BorderSide.none,
@@ -155,6 +172,18 @@ class _RegistrationScreen extends State<RegistrationScreen> {
                               filled: true,
                               fillColor: Color.fromRGBO(255, 255, 255, 1),
                               hintText: 'Confirm password...',
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscureConfirmPassword
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscureConfirmPassword = !_obscureConfirmPassword;
+                                  });
+                                },
+                              ),
                             ),
                             textAlign: TextAlign.center,
                           )

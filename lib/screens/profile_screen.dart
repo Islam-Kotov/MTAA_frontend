@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -148,6 +149,30 @@ Future<bool> saveProfile(String weight, String height, String birthdate) async {
     return true;
   } else {
     print('${response.body}');
+    return false;
+  }
+}
+
+Future<bool> saveProfilePhoto(XFile image) async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('api_token');
+
+  final request = http.MultipartRequest(
+    'POST',
+    Uri.parse('http://192.168.1.36:8000/api/profile-photo'),
+  );
+
+  request.headers['Authorization'] = 'Bearer $token';
+  request.files.add(await http.MultipartFile.fromPath('photo', image.path));
+
+  final response = await request.send();
+  final responseBody = await http.Response.fromStream(response);
+
+  if (response.statusCode == 200) {
+    print('${responseBody.body}');
+    return true;
+  } else {
+    print('${responseBody.body}');
     return false;
   }
 }
@@ -726,6 +751,7 @@ class MyProfilePage extends StatefulWidget {
 class _MyProfilePageState extends State<MyProfilePage> {
   Map<String, dynamic>? profileData;
   Uint8List? profileImageBytes;
+  File? newProfileImage;
 
   bool isLoading = true;
 
@@ -921,9 +947,32 @@ class _MyProfilePageState extends State<MyProfilePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         final picker = ImagePicker();
-                        // final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+                        final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+                        if (pickedFile != null) {
+                          final success = await saveProfilePhoto(pickedFile);
+
+                          print('Uploading file: ${pickedFile.path}');
+                          // print('File exists: ${await pickedFile.exists()}');
+                          print('Length: ${await pickedFile.length()} bytes');
+
+                          if (success) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Profile photo updated successfully')),
+                            );
+                            fetchProfile();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Profile photo update failed')),
+                            );
+                          }
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('No image selected')),
+                          );
+                        }
                       },
                       child: const Text('Upload photo'),
                     ),

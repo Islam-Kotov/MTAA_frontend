@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:semestral_project/screens/all_screens.dart';
-import 'package:semestral_project/screens/workout_categories_screen.dart';
+
 
 
 class HomeScreen extends StatefulWidget {

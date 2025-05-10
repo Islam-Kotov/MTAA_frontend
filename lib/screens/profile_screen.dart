@@ -149,7 +149,7 @@ class _ProfileScreen extends State<ProfileScreen> {
       profileData = data;
       isLoading = false;
     });
-    if (data!['photo_url'] != null) {
+    if (data != null && data['photo_url'] != null) {
       final avatar = await showPrivate(data['photo_url']);
       setState(() {
         profileImageBytes = avatar;

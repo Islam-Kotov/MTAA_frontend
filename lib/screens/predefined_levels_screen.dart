@@ -11,46 +11,41 @@ class PredefinedLevelsScreen extends StatefulWidget {
 }
 
 class _PredefinedLevelsScreenState extends State<PredefinedLevelsScreen> {
-  List beginnerWorkouts = [];
-  List advancedWorkouts = [];
-  bool isLoading = true;
+  List workouts = [];
+  String? selectedLevel;
+  bool isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    fetchPredefinedWorkouts();
-  }
+  Future<void> fetchWorkouts(String level) async {
+    setState(() {
+      isLoading = true;
+      selectedLevel = level;
+      workouts = [];
+    });
 
-  Future<void> fetchPredefinedWorkouts() async {
-    await Future.wait([
-      fetchByLevel('Beginner'),
-      fetchByLevel('Advanced'),
-    ]);
-
-    setState(() => isLoading = false);
-  }
-
-  Future<void> fetchByLevel(String level) async {
-    final uri = Uri.parse('http://10.0.2.2:8000/api/predefined-workouts?level=$level');
+    final uri = Uri.parse('http://192.168.1.36:8000/api/predefined-workouts?level=$level');
     log('📡 Fetching $level workouts: $uri');
 
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        final fixed = data.map((w) {
+          w['image'] = (w['image'] as String)
+              .replaceAll('localhost', '192.168.1.36:8000')
+              .replaceAll('127.0.0.1', '192.168.1.36:8000');
+          return w;
+        }).toList();
         setState(() {
-          if (level == 'Beginner') {
-            beginnerWorkouts = data;
-          } else {
-            advancedWorkouts = data;
-          }
+          workouts = fixed;
         });
       } else {
-        log('❌ Error loading $level workouts', error: response.body);
+        log('❌ Failed to load workouts: ${response.statusCode}', error: response.body);
       }
     } catch (e) {
-      log('❗ Exception loading $level workouts', error: e);
+      log('❗ Error loading workouts', error: e);
     }
+
+    setState(() => isLoading = false);
   }
 
   @override
@@ -62,71 +57,106 @@ class _PredefinedLevelsScreenState extends State<PredefinedLevelsScreen> {
         backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
         elevation: 2,
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Beginner',
-                style: TextStyle(
-                  fontSize: 20,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                Expanded(child: _levelButton('Beginner')),
+                const SizedBox(width: 12),
+                Expanded(child: _levelButton('Advanced')),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          if (selectedLevel != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                '$selectedLevel Workouts',
+                style: const TextStyle(
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
-                )),
-            const SizedBox(height: 12),
-            ...beginnerWorkouts.map<Widget>((w) => _buildWorkoutCard(w)).toList(),
-
-            const SizedBox(height: 24),
-            const Text('Advanced',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                )),
-            const SizedBox(height: 12),
-            ...advancedWorkouts.map<Widget>((w) => _buildWorkoutCard(w)).toList(),
-          ],
-        ),
+                ),
+              ),
+            ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : workouts.isEmpty
+                ? const Center(child: Text('No workouts found for this level.'))
+                : ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: workouts.length,
+              itemBuilder: (context, index) {
+                final workout = workouts[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                  elevation: 3,
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(14),
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        workout['image'],
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          width: 60,
+                          height: 60,
+                          color: Colors.grey.shade300,
+                          child: const Icon(Icons.image_not_supported),
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      workout['title'] ?? 'No title',
+                      style: const TextStyle(
+                          fontSize: 17, fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      '${workout['duration']} | ${workout['calories']} | ${workout['exercise_count']} exercises',
+                      style: const TextStyle(
+                          fontSize: 13, color: Colors.black54),
+                    ),
+                    onTap: () {
+                      log('📦 Tapped workout ID: ${workout['id']}');
+                      // TODO: перейти на WorkoutDetail
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildWorkoutCard(Map workout) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      elevation: 3,
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(14),
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            workout['image'] ?? '',
-            width: 60,
-            height: 60,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
-              width: 60,
-              height: 60,
-              color: Colors.grey.shade300,
-              child: const Icon(Icons.image_not_supported),
-            ),
-          ),
-        ),
-        title: Text(
-          workout['title'] ?? 'No title',
-          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          '${workout['duration']} | ${workout['calories']} | ${workout['exercise_count']} exercises',
-          style: const TextStyle(fontSize: 13, color: Colors.black54),
-        ),
-        onTap: () {
-          log('📦 Tapped predefined workout ID: ${workout['id']}');
-          // TODO: Navigate to detail screen
-        },
+  Widget _levelButton(String label) {
+    final isActive = selectedLevel == label;
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isActive
+            ? const Color.fromRGBO(57, 132, 173, 1)
+            : Colors.white,
+        foregroundColor: isActive ? Colors.white : Colors.black87,
+        elevation: 3,
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      onPressed: () => fetchWorkouts(label),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
       ),
     );
   }

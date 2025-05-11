@@ -189,8 +189,6 @@ class _FriendsScreenState extends State<FriendsScreen> with TickerProviderStateM
                   icon: const Icon(Icons.send),
                   label: const Text('Send'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(58, 132, 173, 1),
-                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
@@ -211,10 +209,9 @@ class _FriendsScreenState extends State<FriendsScreen> with TickerProviderStateM
       opacity: opacity,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: const [
-            BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
+            BoxShadow(blurRadius: 8, offset: Offset(0, 4)),
           ],
         ),
         padding: const EdgeInsets.all(16),
@@ -223,23 +220,22 @@ class _FriendsScreenState extends State<FriendsScreen> with TickerProviderStateM
           children: [
             Row(
               children: [
-                Icon(icon, color: Colors.blueGrey[700]),
+                Icon(icon),
                 const SizedBox(width: 8),
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             users.isEmpty
-                ? const Text('No entries', style: TextStyle(color: Colors.black54))
+                ? const Text('No entries', style: TextStyle())
                 : Column(
               children: users.map((u) {
                 return Container(
                   margin: const EdgeInsets.symmetric(vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color.fromRGBO(240, 246, 255, 1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: ListTile(

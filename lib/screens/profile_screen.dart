@@ -273,7 +273,6 @@ class _ProfileScreen extends State<ProfileScreen> {
                   profileData!['email'] ?? '',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.black54
                   )
                 ),
                 SizedBox(height: 4),
@@ -292,14 +291,12 @@ class _ProfileScreen extends State<ProfileScreen> {
                             '${profileData!['weight']}',
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.black54
                             )
                           ),
                           Text(
                             'Weight',
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.black54
                             )
                           )
                         ],
@@ -316,14 +313,12 @@ class _ProfileScreen extends State<ProfileScreen> {
                             '${profileData!['height']}',
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.black54
                             )
                           ),
                           Text(
                             'Height',
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.black54
                             )
                           )
                         ],
@@ -340,14 +335,12 @@ class _ProfileScreen extends State<ProfileScreen> {
                             '${profileData!['birthdate']}',
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.black54
                             )
                           ),
                           Text(
                             'Birthdate',
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.black54
                             )
                           )
                         ],
@@ -365,17 +358,15 @@ class _ProfileScreen extends State<ProfileScreen> {
               spacing: 20,
               children: [
                 Card(
-                  color: Colors.white,
                   child: ListTile(
-                    leading: Icon(Icons.person_outline_sharp, size: 32, color: Colors.black),
+                    leading: Icon(Icons.person_outline_sharp, size: 32),
                     title: Text(
                       'My profile',
                       style: TextStyle(
                         fontSize: 22,
-                        color: Colors.black,
                       ),
                     ),
-                    trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                    trailing: Icon(Icons.arrow_forward_ios),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -387,17 +378,15 @@ class _ProfileScreen extends State<ProfileScreen> {
                   )
                 ),
                 Card(
-                  color: Colors.white,
                   child: ListTile(
-                    leading: Icon(Icons.settings, size: 32, color: Colors.black),
+                    leading: Icon(Icons.settings, size: 32),
                     title: Text(
                       'Settings',
                       style: TextStyle(
                         fontSize: 22,
-                        color: Colors.black,
                       ),
                     ),
-                    trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                    trailing: Icon(Icons.arrow_forward_ios),
                     onTap: () {
                         Navigator.push(
                         context,
@@ -407,17 +396,15 @@ class _ProfileScreen extends State<ProfileScreen> {
                   )
                 ),
                 Card(
-                  color: Colors.white,
                   child: ListTile(
-                    leading: Icon(Icons.logout_sharp, size: 32, color: Colors.black),
+                    leading: Icon(Icons.logout_sharp, size: 32),
                     title: Text(
                       'Logout',
                       style: TextStyle(
                         fontSize: 22,
-                        color: Colors.black,
                       ),
                     ),
-                    trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                    trailing: Icon(Icons.arrow_forward_ios),
                     onTap: () async {
                       final success = await logout();
 
@@ -457,37 +444,34 @@ class SettingsPage extends StatelessWidget {
       body: Column(
         children: [
           ListTile(
-            leading: Icon(Icons.notifications, size: 32, color: Colors.black),
+            leading: Icon(Icons.notifications, size: 32),
             title: Text(
               'Notifications',
               style: TextStyle(
                 fontSize: 22,
-                color: Colors.black,
               ),
             ),
             trailing: NotificationsSwitch(),
           ),
           ListTile(
-            leading: Icon(Icons.dark_mode_outlined, size: 32, color: Colors.black),
+            leading: Icon(Icons.dark_mode_outlined, size: 32),
             title: Text(
               'Dark mode',
               style: TextStyle(
                 fontSize: 22,
-                color: Colors.black,
               ),
             ),
             trailing: DarkmodeSwitch(),
           ),
           ListTile(
-            leading: Icon(Icons.password_sharp, size: 32, color: Colors.black),
+            leading: Icon(Icons.password_sharp, size: 32),
             title: Text(
               'Reset the password',
               style: TextStyle(
                 fontSize: 22,
-                color: Colors.black,
               ),
             ),
-            trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+            trailing: Icon(Icons.arrow_forward_ios),
             onTap: () async {
               showDialog(
                 context: context,
@@ -498,15 +482,14 @@ class SettingsPage extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: Icon(Icons.delete_outline_sharp, size: 32, color: Colors.black),
+            leading: Icon(Icons.delete_outline_sharp, size: 32),
             title: Text(
               'Delete account',
               style: TextStyle(
                 fontSize: 22,
-                color: Colors.black,
               ),
             ),
-            trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+            trailing: Icon(Icons.arrow_forward_ios),
             onTap: () async {
               showDialog(
                 context: context,
@@ -593,12 +576,13 @@ class _PasswordResetDialogState extends State<PasswordResetDialog> {
           ],
         ),
       ),
+      actionsAlignment: MainAxisAlignment.center,
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
+        TextButton(
           onPressed: () async {
             final email = emailController.text;
             final currentPassword = currentPasswordController.text;
@@ -666,12 +650,13 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
           ],
         ),
       ),
+      actionsAlignment: MainAxisAlignment.center,
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
+        TextButton(
           onPressed: () async {
             final password = passwordController.text;
 
@@ -716,7 +701,6 @@ class _NotificationsSwitchState extends State<NotificationsSwitch> {
     return Switch(
       // This bool value toggles the switch.
       value: notificationsOn,
-      activeColor: Color.fromRGBO(111, 167, 204, 1),
       onChanged: (bool value) {
         // This is called when the user toggles the switch.
         setState(() {
@@ -737,7 +721,6 @@ class DarkmodeSwitch extends StatelessWidget {
 
     return Switch(
       value: isDarkMode,
-      activeColor: const Color.fromRGBO(111, 167, 204, 1),
       onChanged: (value) {
         themeNotifier.toggleTheme(value);
       },
@@ -797,6 +780,8 @@ class _MyProfilePageState extends State<MyProfilePage> {
       );
     }
 
+    final colors = Theme.of(context).colorScheme;
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -809,7 +794,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
           children: [
             Container(
               width: double.infinity,
-              color: Color.fromRGBO(145, 193, 232, 1), // Light blue background
+              color: colors.primaryContainer,
               padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
               child: Column(
                 children: [
@@ -847,7 +832,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
                     profileData!['email'] ?? '',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.black54
                     )
                   ),
                   SizedBox(height: 4),
@@ -855,7 +839,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                     padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
-                      color: Color.fromRGBO(111, 167, 204, 1),
+                      color: colors.secondaryContainer,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -866,14 +850,12 @@ class _MyProfilePageState extends State<MyProfilePage> {
                               '${profileData!['weight']}',
                               style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.black54
                               )
                             ),
                             Text(
                               'Weight',
                               style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.black54
                               )
                             )
                           ],
@@ -890,14 +872,12 @@ class _MyProfilePageState extends State<MyProfilePage> {
                               '${profileData!['height']}',
                               style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.black54
                               )
                             ),
                             Text(
                               'Height',
                               style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.black54
                               )
                             )
                           ],
@@ -914,14 +894,12 @@ class _MyProfilePageState extends State<MyProfilePage> {
                               '${profileData!['birthdate']}',
                               style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.black54
                               )
                             ),
                             Text(
                               'Birthdate',
                               style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.black54
                               )
                             )
                           ],

@@ -23,12 +23,29 @@ final ThemeData lightTheme = ThemeData(
     primaryContainer: Color.fromRGBO(145, 193, 232, 1),
     secondaryContainer: Color.fromRGBO(111, 167, 204, 1),
   ),
+  bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    backgroundColor: Color.fromRGBO(57, 132, 173, 1),
+    unselectedItemColor: Colors.black,
+    selectedItemColor: Color.fromRGBO(76, 21, 152, 1),
+  ),
 );
 
-final ThemeData darkTheme = ThemeData(
-  brightness: Brightness.dark,
-  primarySwatch: Colors.blue,
-  scaffoldBackgroundColor: Colors.black,
+final ThemeData darkTheme = ThemeData.dark().copyWith(
+  colorScheme: ThemeData.dark().colorScheme.copyWith(
+    primaryContainer: Color.fromRGBO(24, 27, 29, 1),
+    secondaryContainer: Color.fromRGBO(65, 65, 66, 1),
+  ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ButtonStyle(
+      iconColor: WidgetStatePropertyAll(Colors.white),
+      textStyle: WidgetStatePropertyAll(
+        TextStyle(
+          color: Colors.white,
+          
+        )
+      )
+    )
+  )
 );
 
 void main() {
@@ -49,12 +66,12 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       theme: lightTheme,
-      darkTheme: ThemeData.dark(),
+      darkTheme: darkTheme,
       themeMode: themeNotifier.themeMode,
       home: const AuthorizationScreen(),
     );
     // return MaterialApp(
-    //   home: FillProfileInfoScreen(),
+    //   home: TestScreen(),
     // );
   }
 }

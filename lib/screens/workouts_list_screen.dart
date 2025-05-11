@@ -210,11 +210,8 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(207, 228, 242, 1),
       appBar: AppBar(
         title: Text(widget.categoryName),
-        backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
-        elevation: 2,
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.filter_list),
@@ -241,7 +238,6 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: Colors.blueGrey,
                 ),
               ),
             ),
@@ -310,7 +306,7 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
                     ),
                     subtitle: Text(
                       workout['exercise_type'] ?? '',
-                      style: const TextStyle(fontSize: 14, color: Colors.black54),
+                      style: const TextStyle(fontSize: 14),
                     ),
                     trailing: IconButton(
                       icon: Icon(

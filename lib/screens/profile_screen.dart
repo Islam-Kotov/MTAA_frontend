@@ -238,15 +238,27 @@ class _ProfileScreen extends State<ProfileScreen> {
             padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
             child: Column(
               children: [
-                CircleAvatar(
-                  backgroundColor: Colors.white,
-                  radius: 55,
-                  backgroundImage: profileImageBytes != null
-                    ? MemoryImage(profileImageBytes!)
-                    : null,
-                  child: profileImageBytes == null
-                    ? Icon(Icons.person, size: 40)
-                    : null,
+                GestureDetector(
+                  onTap: () {
+                    if (profileImageBytes != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => FullScreenImage(imageBytes: profileImageBytes!),
+                        ),
+                      );
+                    }
+                  },
+                  child: CircleAvatar(
+                    backgroundColor: Colors.white,
+                    radius: 55,
+                    backgroundImage: profileImageBytes != null
+                      ? MemoryImage(profileImageBytes!)
+                      : null,
+                    child: profileImageBytes == null
+                      ? Icon(Icons.person, size: 40)
+                      : null,
+                  ),
                 ),
                 Text(
                   profileData!['name'] ?? '',
@@ -794,219 +806,257 @@ class _MyProfilePageState extends State<MyProfilePage> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My profile'),
-        backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
-      ),
-      backgroundColor: Color.fromRGBO(207, 228, 242, 1),
-      resizeToAvoidBottomInset: false,
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Container(
-            width: double.infinity,
-            color: Color.fromRGBO(145, 193, 232, 1), // Light blue background
-            padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-            child: Column(
-              children: [
-                CircleAvatar(
-                  backgroundColor: Colors.white,
-                  radius: 55,
-                  backgroundImage: profileImageBytes != null
-                    ? MemoryImage(profileImageBytes!)
-                    : null,
-                  child: profileImageBytes == null
-                    ? Icon(Icons.person, size: 40)
-                    : null,
-                ),
-                Text(
-                  profileData!['name'] ?? '',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold
-                  )
-                ),
-                SizedBox(height: 4),
-                Text(
-                  profileData!['email'] ?? '',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black54
-                  )
-                ),
-                SizedBox(height: 4),
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Color.fromRGBO(111, 167, 204, 1),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('My profile'),
+          backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
+        ),
+        backgroundColor: Color.fromRGBO(207, 228, 242, 1),
+        resizeToAvoidBottomInset: false,
+        body: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Container(
+              width: double.infinity,
+              color: Color.fromRGBO(145, 193, 232, 1), // Light blue background
+              padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+              child: Column(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      if (profileImageBytes != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => FullScreenImage(imageBytes: profileImageBytes!),
+                          ),
+                        );
+                      }
+                    },
+                    child: CircleAvatar(
+                      backgroundColor: Colors.white,
+                      radius: 55,
+                      backgroundImage: profileImageBytes != null
+                        ? MemoryImage(profileImageBytes!)
+                        : null,
+                      child: profileImageBytes == null
+                        ? Icon(Icons.person, size: 40)
+                        : null,
+                    ),
                   ),
-                  child: Row(
+                  Text(
+                    profileData!['name'] ?? '',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold
+                    )
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    profileData!['email'] ?? '',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54
+                    )
+                  ),
+                  SizedBox(height: 4),
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Color.fromRGBO(111, 167, 204, 1),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          children: [
+                            Text(
+                              '${profileData!['weight']}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black54
+                              )
+                            ),
+                            Text(
+                              'Weight',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black54
+                              )
+                            )
+                          ],
+                        ),
+                        Container(
+                          height: 60, // adjust as needed
+                          width: 1,
+                          color: Colors.white,
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                        ),
+                        Column(
+                          children: [
+                            Text(
+                              '${profileData!['height']}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black54
+                              )
+                            ),
+                            Text(
+                              'Height',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black54
+                              )
+                            )
+                          ],
+                        ),
+                        Container(
+                          height: 60, // adjust as needed
+                          width: 1,
+                          color: Colors.white,
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                        ),
+                        Column(
+                          children: [
+                            Text(
+                              '${profileData!['birthdate']}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black54
+                              )
+                            ),
+                            Text(
+                              'Birthdate',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black54
+                              )
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+            SizedBox(height: 10),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextField(
+                          controller: weightController,
+                          decoration: InputDecoration(labelText: 'Weight'),
+                        ),
+                        SizedBox(height: 14),
+                        TextField(
+                          controller: heightController,
+                          decoration: InputDecoration(labelText: 'Height'),
+                        ),
+                        SizedBox(height: 14),
+                        TextField(
+                          controller: birthdateController,
+                          decoration: InputDecoration(labelText: 'Birthdate'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Column(
-                        children: [
-                          Text(
-                            '${profileData!['weight']}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black54
-                            )
-                          ),
-                          Text(
-                            'Weight',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black54
-                            )
-                          )
-                        ],
-                      ),
-                      Container(
-                        height: 60, // adjust as needed
-                        width: 1,
-                        color: Colors.white,
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                      ),
-                      Column(
-                        children: [
-                          Text(
-                            '${profileData!['height']}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black54
-                            )
-                          ),
-                          Text(
-                            'Height',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black54
-                            )
-                          )
-                        ],
-                      ),
-                      Container(
-                        height: 60, // adjust as needed
-                        width: 1,
-                        color: Colors.white,
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                      ),
-                      Column(
-                        children: [
-                          Text(
-                            '${profileData!['birthdate']}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black54
-                            )
-                          ),
-                          Text(
-                            'Birthdate',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black54
-                            )
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            ),
-          ),
-          SizedBox(height: 10),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      TextField(
-                        controller: weightController,
-                        decoration: InputDecoration(labelText: 'Weight'),
-                      ),
-                      SizedBox(height: 14),
-                      TextField(
-                        controller: heightController,
-                        decoration: InputDecoration(labelText: 'Height'),
-                      ),
-                      SizedBox(height: 14),
-                      TextField(
-                        controller: birthdateController,
-                        decoration: InputDecoration(labelText: 'Birthdate'),
-                      ),
-                    ],
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () async {
-                        final picker = ImagePicker();
-                        final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+                      ElevatedButton(
+                        onPressed: () async {
+                          final picker = ImagePicker();
+                          final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-                        if (pickedFile != null) {
-                          final success = await saveProfilePhoto(pickedFile);
+                          if (pickedFile != null) {
+                            final success = await saveProfilePhoto(pickedFile);
 
-                          print('Uploading file: ${pickedFile.path}');
-                          // print('File exists: ${await pickedFile.exists()}');
-                          print('Length: ${await pickedFile.length()} bytes');
+                            print('Uploading file: ${pickedFile.path}');
+                            // print('File exists: ${await pickedFile.exists()}');
+                            print('Length: ${await pickedFile.length()} bytes');
 
+                            if (success) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Profile photo updated successfully')),
+                              );
+                              fetchProfile();
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Profile photo update failed')),
+                              );
+                            }
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('No image selected')),
+                            );
+                          }
+                        },
+                        child: const Text('Upload photo'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          final weight = weightController.text;
+                          final height = heightController.text;
+                          final birthdate = birthdateController.text;
+
+                          final success = await saveProfile(weight, height, birthdate);
+                          
                           if (success) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Profile photo updated successfully')),
+                              const SnackBar(content: Text('Profile updated successfully')),
                             );
                             fetchProfile();
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Profile photo update failed')),
+                              const SnackBar(content: Text('Profile update failed')),
                             );
                           }
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('No image selected')),
-                          );
-                        }
-                      },
-                      child: const Text('Upload photo'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        final weight = weightController.text;
-                        final height = heightController.text;
-                        final birthdate = birthdateController.text;
-
-                        final success = await saveProfile(weight, height, birthdate);
-                        
-                        if (success) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Profile updated successfully')),
-                          );
-                          fetchProfile();
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Profile update failed')),
-                          );
-                        }
-                      },
-                      child: const Text('Update profile'),
-                    ),
-                  ],
-                )
-              ],
+                        },
+                        child: const Text('Update profile'),
+                      ),
+                    ],
+                  )
+                ],
+              ),
             ),
-          ),
-          SizedBox(height: 70),
-        ],
+            SizedBox(height: 70),
+          ],
+        )
       )
+    );
+  }
+}
+
+class FullScreenImage extends StatelessWidget {
+  final Uint8List imageBytes;
+
+  const FullScreenImage({Key? key, required this.imageBytes}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
+      ),
+      body: Center(
+        child: InteractiveViewer(
+          child: Image.memory(imageBytes),
+        ),
+      ),
     );
   }
 }

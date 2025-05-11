@@ -31,18 +31,13 @@ class _HomeScreen extends State<HomeScreen> {
     ));
 
     channel.stream.listen((message) {
-      // final data = jsonDecode(message);
+      final data = jsonDecode(message);
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: StreamBuilder(
-                stream: channel.stream,
-                builder: (context, snapshot) {
-                  return Text(snapshot.hasData ? '${snapshot.data}' : '');
-                },
-              ),
+              content: Text(data.toString()),
             ),
           );
         }

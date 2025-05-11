@@ -32,7 +32,6 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
   @override
   void initState() {
     super.initState();
-
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 700),
@@ -54,55 +53,63 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
     super.dispose();
   }
 
-  ButtonStyle _buttonStyle() {
+  ButtonStyle _buttonStyle(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return ElevatedButton.styleFrom(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
-      // backgroundColor: Colors.white,
-      // foregroundColor: Colors.black87,
+      backgroundColor: colors.primary,
+      foregroundColor: colors.onPrimary,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       minimumSize: const Size(double.infinity, 80),
-      // elevation: 5,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Community'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            FadeTransition(
-              opacity: _friendsFade,
-              child: ElevatedButton.icon(
-                style: _buttonStyle(),
-                icon: const Icon(Icons.people_outline, size: 28),
-                label: const Text(
-                  'Friends',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+      appBar: AppBar(title: const Text('Community')),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FadeTransition(
+                  opacity: _friendsFade,
+                  child: ElevatedButton.icon(
+                    style: _buttonStyle(context),
+                    icon: const Icon(Icons.people_outline, size: 28),
+                    label: Text(
+                      'Friends',
+                      style: textStyle.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const FriendsScreen()),
+                      );
+                    },
                   ),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const FriendsScreen()),
-                  );
-                },
-              ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  style: _buttonStyle(context),
+                  icon: const Icon(Icons.waving_hand_outlined),
+                  label: Text('Say Hello', style: textStyle.titleMedium),
+                  onPressed: () async {
+                    await sayHello();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('👋 Hello sent to server')),
+                    );
+                  },
+                ),
+              ],
             ),
-            ElevatedButton(
-              onPressed: () async {
-                await sayHello();
-              },
-              child: Text('Say hello')
-            )
-          ],
+          ),
         ),
       ),
     );

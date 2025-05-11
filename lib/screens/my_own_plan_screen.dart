@@ -148,96 +148,100 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : exercises.isEmpty
-          ? const Center(
-        child: Text(
-          'Your custom workout plan is empty.\nTap the + button to add exercises.',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18),
-        ),
-      )
-          : ListView.builder(
-        itemCount: exercises.length,
-        padding: const EdgeInsets.all(16),
-        itemBuilder: (context, index) {
-          final item = exercises[index];
-
-          return Card(
-            margin: const EdgeInsets.only(bottom: 20),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+          : Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: exercises.isEmpty
+              ? const Padding(
+            padding: EdgeInsets.all(32),
+            child: Text(
+              'Your custom workout plan is empty.\nTap the + button to add exercises.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 18),
             ),
-            elevation: 6,
-            child: InkWell(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => WorkoutDetailScreen(
-                    workoutId: item['id'],
-                    heroTag: 'exercise-image-${item['id']}',
-                  ),
+          )
+              : ListView.builder(
+            itemCount: exercises.length,
+            padding: const EdgeInsets.all(16),
+            itemBuilder: (context, index) {
+              final item = exercises[index];
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
                 ),
-              ),
-              borderRadius: BorderRadius.circular(20),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 18),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item['exercise_name'],
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Sets: ${item['sets']}    Reps: ${item['repetitions']}',
-                            style: const TextStyle(
-                                fontSize: 16),
-                          ),
-                        ],
+                elevation: 6,
+                child: InkWell(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => WorkoutDetailScreen(
+                        workoutId: item['id'],
+                        heroTag: 'exercise-image-${item['id']}',
                       ),
                     ),
-                    Column(
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 18),
+                    child: Row(
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit,
-                              color: Colors.orange),
-                          onPressed: () => showUpdateDialog(
-                            item['id'],
-                            item['sets'],
-                            item['repetitions'],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item['exercise_name'],
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Sets: ${item['sets']}    Reps: ${item['repetitions']}',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete,
-                              color: Colors.red),
-                          onPressed: () =>
-                              removeExercise(item['id']),
+                        Column(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit,
+                                  color: Colors.orange),
+                              onPressed: () => showUpdateDialog(
+                                item['id'],
+                                item['sets'],
+                                item['repetitions'],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete,
+                                  color: Colors.red),
+                              onPressed: () =>
+                                  removeExercise(item['id']),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
       floatingActionButton: ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
           foregroundColor: Colors.black87,
-          padding:
-          const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           elevation: 6,
         ),
         icon: const Icon(Icons.add),

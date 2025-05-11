@@ -55,10 +55,8 @@ class _PredefinedWorkoutDetailScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
         title: const Text('Workout Details'),
-        backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -79,7 +77,7 @@ class _PredefinedWorkoutDetailScreenState
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Icon(Icons.fitness_center,
-                    size: 80, color: Colors.black54),
+                    size: 80),
               ),
             ),
             const SizedBox(height: 24),
@@ -94,8 +92,7 @@ class _PredefinedWorkoutDetailScreenState
             Text(
               workout!['focus'] ?? '',
               style: const TextStyle(
-                fontSize: 16,
-                color: Colors.black54,
+                fontSize: 16
               ),
             ),
             const SizedBox(height: 20),
@@ -128,7 +125,7 @@ class _PredefinedWorkoutDetailScreenState
   Widget _infoBlock() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.blueGrey.shade50,
+        // color: Colors.blueGrey.shade50,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(16),
@@ -171,11 +168,11 @@ class _PredefinedWorkoutDetailScreenState
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          // color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.08),
+              color: Colors.purple,
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -212,7 +209,7 @@ class _PredefinedWorkoutDetailScreenState
                     exercise['reps_sets'] ?? '-',
                     style: const TextStyle(
                       fontSize: 14,
-                      color: Colors.black54,
+                      // color: Colors.black54,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -232,7 +229,7 @@ class _PredefinedWorkoutDetailScreenState
   Widget _fallbackIcon() => Container(
     width: 60,
     height: 60,
-    color: Colors.grey.shade300,
+    // color: Colors.grey.shade300,
     child: const Icon(Icons.image_not_supported),
   );
 }

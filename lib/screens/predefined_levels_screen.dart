@@ -16,6 +16,7 @@ class _PredefinedLevelsScreenState extends State<PredefinedLevelsScreen> {
   List workouts = [];
   String? selectedLevel;
   bool isLoading = false;
+  ColorScheme colors = ThemeData().colorScheme;
 
   @override
   void initState() {
@@ -58,12 +59,13 @@ class _PredefinedLevelsScreenState extends State<PredefinedLevelsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final _colors = Theme.of(context).colorScheme;
+
+    colors = _colors;
+
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(207, 228, 242, 1),
       appBar: AppBar(
         title: const Text('Prepared Workouts'),
-        backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
-        elevation: 2,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,7 +90,6 @@ class _PredefinedLevelsScreenState extends State<PredefinedLevelsScreen> {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
                 ),
               ),
             ),
@@ -141,9 +142,9 @@ class _PredefinedLevelsScreenState extends State<PredefinedLevelsScreen> {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: isActive
-            ? const Color.fromRGBO(57, 132, 173, 1)
-            : Colors.white,
-        foregroundColor: isActive ? Colors.white : Colors.black87,
+            ? colors.primary
+            : colors.onPrimary,
+        foregroundColor: isActive ? Colors.white : Colors.black,
         elevation: 3,
         padding: const EdgeInsets.symmetric(vertical: 18),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

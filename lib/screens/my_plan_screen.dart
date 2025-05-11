@@ -58,8 +58,6 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
   ButtonStyle _buttonStyle() {
     return ElevatedButton.styleFrom(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
-      backgroundColor: Colors.white,
-      foregroundColor: Colors.black87,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       minimumSize: const Size(double.infinity, 80),
       elevation: 5,
@@ -68,30 +66,27 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(207, 228, 242, 1),
       appBar: AppBar(
         title: const Text('My plan'),
-        backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
-        elevation: 2,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🗓️ Иконка плана сверху
             Center(
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
                   shape: BoxShape.circle,
-                  boxShadow: const [
-                    BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+                  boxShadow: [
+                    BoxShadow(blurRadius: 6, offset: Offset(0, 3), color: colors.primary ),
                   ],
                 ),
-                child: const Icon(Icons.event_note, size: 64, color: Color.fromRGBO(57, 132, 173, 1)),
+                child: const Icon(Icons.event_note, size: 64),
               ),
             ),
             const SizedBox(height: 32),
@@ -101,10 +96,10 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
               opacity: _preparedFade,
               child: ElevatedButton.icon(
                 style: _buttonStyle(),
-                icon: const Icon(Icons.fitness_center, size: 28, color: Colors.black87),
+                icon: const Icon(Icons.fitness_center, size: 28),
                 label: const Text(
                   'Choose a Prepared Workout Plan',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 onPressed: () {
                   Navigator.push(
@@ -121,10 +116,10 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
               opacity: _customFade,
               child: ElevatedButton.icon(
                 style: _buttonStyle(),
-                icon: const Icon(Icons.edit_note, size: 28, color: Colors.black87),
+                icon: const Icon(Icons.edit_note, size: 28),
                 label: const Text(
                   'Create My Own Plan',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 onPressed: () {
                   Navigator.push(
@@ -152,7 +147,6 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                     height: 160,
                     width: 160,
                     decoration: BoxDecoration(
-                      color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: const [
                         BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
@@ -161,11 +155,11 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                     child: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.directions_run, size: 40, color: Colors.black87),
+                        Icon(Icons.directions_run, size: 40),
                         SizedBox(height: 10),
                         Text(
                           'Go for a run',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                       ],

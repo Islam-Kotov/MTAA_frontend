@@ -211,7 +211,7 @@ class _FriendsScreenState extends State<FriendsScreen> with TickerProviderStateM
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           boxShadow: const [
-            BoxShadow(blurRadius: 8, offset: Offset(0, 4)),
+            BoxShadow(blurRadius: 8, offset: Offset(0, 4), color: Colors.amber),
           ],
         ),
         padding: const EdgeInsets.all(16),
@@ -265,7 +265,7 @@ class _FriendsScreenState extends State<FriendsScreen> with TickerProviderStateM
                         ),
                       ],
                     )
-                        : const Icon(Icons.mail_outline, color: Colors.grey),
+                        : const Icon(Icons.mail_outline),
                   ),
                 );
               }).toList(),

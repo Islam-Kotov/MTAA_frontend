@@ -40,6 +40,11 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
       foregroundColor: Colors.white,
       iconColor: Colors.white,
     )
+  ),
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      foregroundColor: Colors.white,
+    )
   )
 );
 

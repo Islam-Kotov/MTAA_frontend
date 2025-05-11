@@ -143,10 +143,8 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(207, 228, 242, 1),
       appBar: AppBar(
         title: const Text('My Custom Plan'),
-        backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -155,7 +153,7 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
         child: Text(
           'Your custom workout plan is empty.\nTap the + button to add exercises.',
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18, color: Colors.black54),
+          style: TextStyle(fontSize: 18),
         ),
       )
           : ListView.builder(
@@ -201,8 +199,7 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
                           Text(
                             'Sets: ${item['sets']}    Reps: ${item['repetitions']}',
                             style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.black87),
+                                fontSize: 16),
                           ),
                         ],
                       ),

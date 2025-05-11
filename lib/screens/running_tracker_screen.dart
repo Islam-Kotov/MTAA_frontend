@@ -207,10 +207,8 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(207, 228, 242, 1),
       appBar: AppBar(
         title: const Text('Running Tracker'),
-        backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
       ),
       body: !_isMapReady
           ? const Center(child: CircularProgressIndicator())

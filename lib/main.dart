@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'screens/all_screens.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 final ThemeData lightTheme = ThemeData(
   scaffoldBackgroundColor: const Color.fromRGBO(207, 228, 242, 1),
@@ -48,7 +50,15 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
   )
 );
 
-void main() {
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print('Handling a background message: ${message.messageId}');
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeNotifier(),

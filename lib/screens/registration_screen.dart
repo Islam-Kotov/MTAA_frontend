@@ -215,7 +215,7 @@ class _RegistrationScreen extends State<RegistrationScreen> {
                                   if (success) {
                                     Navigator.pushReplacement(
                                       context,
-                                      MaterialPageRoute(builder: (context) => const HomeScreen()),
+                                      MaterialPageRoute(builder: (context) => const FillProfileInfoScreen()),
                                     );
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(

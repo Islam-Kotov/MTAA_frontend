@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
       home: const AuthorizationScreen(),
     );
     // return MaterialApp(
-    //   home: HomeScreen(),
+    //   home: FillProfileInfoScreen(),
     // );
   }
 }

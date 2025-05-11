@@ -1,5 +1,6 @@
 export 'authorization_screen.dart';
 export 'registration_screen.dart';
+export 'fill_profile_info_screen.dart';
 export 'home_screen.dart';
 export 'profile_screen.dart';
 export 'workout_categories_screen.dart';

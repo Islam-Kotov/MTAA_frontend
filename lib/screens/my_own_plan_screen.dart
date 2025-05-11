@@ -163,7 +163,6 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
         padding: const EdgeInsets.all(16),
         itemBuilder: (context, index) {
           final item = exercises[index];
-          final photoUrl = item['photo_url'];
 
           return Card(
             margin: const EdgeInsets.only(bottom: 20),
@@ -183,33 +182,10 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
               ),
               borderRadius: BorderRadius.circular(20),
               child: Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20, vertical: 18),
                 child: Row(
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: photoUrl != null
-                          ? Image.network(
-                        photoUrl,
-                        width: 70,
-                        height: 70,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            Container(
-                              width: 70,
-                              height: 70,
-                              color: Colors.grey.shade300,
-                              child: const Icon(Icons.image_not_supported),
-                            ),
-                      )
-                          : Container(
-                        width: 70,
-                        height: 70,
-                        color: Colors.grey.shade300,
-                        child: const Icon(Icons.image, size: 40),
-                      ),
-                    ),
-                    const SizedBox(width: 20),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,7 +200,9 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
                           const SizedBox(height: 8),
                           Text(
                             'Sets: ${item['sets']}    Reps: ${item['repetitions']}',
-                            style: const TextStyle(fontSize: 16, color: Colors.black87),
+                            style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.black87),
                           ),
                         ],
                       ),
@@ -232,7 +210,8 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
                     Column(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.orange),
+                          icon: const Icon(Icons.edit,
+                              color: Colors.orange),
                           onPressed: () => showUpdateDialog(
                             item['id'],
                             item['sets'],
@@ -240,8 +219,10 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => removeExercise(item['id']),
+                          icon: const Icon(Icons.delete,
+                              color: Colors.red),
+                          onPressed: () =>
+                              removeExercise(item['id']),
                         ),
                       ],
                     ),
@@ -256,8 +237,10 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
           foregroundColor: Colors.black87,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          padding:
+          const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           elevation: 6,
         ),
         icon: const Icon(Icons.add),
@@ -272,7 +255,7 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
               builder: (_) => const WorkoutCategoriesScreen(),
             ),
           );
-          fetchPlan(); // refresh on return
+          fetchPlan();
         },
       ),
     );

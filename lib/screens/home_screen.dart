@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:semestral_project/screens/all_screens.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -9,37 +11,34 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreen extends State<HomeScreen> {
-  late final WebSocketChannel channel;
-
   @override
   void initState() {
     super.initState();
+    _initFirebaseMessaging();
+  }
 
-    channel = WebSocketChannel.connect(
-      Uri.parse('ws://192.168.1.36:8080/app/cfdjqmnqx0vggflribbd?protocol=7&client=js&version=1.0&format=json'),
+  Future<void> _initFirebaseMessaging() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
     );
 
-    channel.sink.add(jsonEncode(
-      {
-        'event': 'pusher:subscribe',
-        'data': {
-          'channel': 'test'
-        }
+    // Get the device token
+    String? token = await messaging.getToken();
+    print("FCM Token: $token");
+
+    // Listen to messages when the app is in foreground
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Got a message in foreground!');
+      if (message.notification != null) {
+        print('Title: ${message.notification!.title}');
+        print('Body: ${message.notification!.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${message.notification!.body}')),
+        );
       }
-    ));
-
-    channel.stream.listen((message) {
-      final data = jsonDecode(message);
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(data.toString()),
-            ),
-          );
-        }
-      });
     });
   }
 

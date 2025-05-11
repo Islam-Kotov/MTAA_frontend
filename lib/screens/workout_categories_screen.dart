@@ -54,10 +54,10 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(207, 228, 242, 1),
+      // backgroundColor: const Color.fromRGBO(207, 228, 242, 1),
       appBar: AppBar(
         title: const Text('Workout Categories'),
-        backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
+        // backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
         elevation: 2,
       ),
       body: isLoading

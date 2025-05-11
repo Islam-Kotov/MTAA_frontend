@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:semestral_project/screens/all_screens.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,33 +14,33 @@ class _HomeScreen extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _initFirebaseMessaging();
+    // _initFirebaseMessaging();
   }
 
-  Future<void> _initFirebaseMessaging() async {
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-    await messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+  // Future<void> _initFirebaseMessaging() async {
+  //   FirebaseMessaging messaging = FirebaseMessaging.instance;
+  //   await messaging.requestPermission(
+  //     alert: true,
+  //     badge: true,
+  //     sound: true,
+  //   );
 
-    // Get the device token
-    String? token = await messaging.getToken();
-    print("FCM Token: $token");
+  //   // Get the device token
+  //   String? token = await messaging.getToken();
+  //   print("FCM Token: $token");
 
-    // Listen to messages when the app is in foreground
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Got a message in foreground!');
-      if (message.notification != null) {
-        print('Title: ${message.notification!.title}');
-        print('Body: ${message.notification!.body}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${message.notification!.body}')),
-        );
-      }
-    });
-  }
+  //   // Listen to messages when the app is in foreground
+  //   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+  //     print('Got a message in foreground!');
+  //     if (message.notification != null) {
+  //       print('Title: ${message.notification!.title}');
+  //       print('Body: ${message.notification!.body}');
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('${message.notification!.body}')),
+  //       );
+  //     }
+  //   });
+  // }
 
   int _selectedIndex = 0;
 

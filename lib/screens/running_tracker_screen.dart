@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 
 class RunningTrackerScreen extends StatefulWidget {
   const RunningTrackerScreen({super.key});
@@ -14,24 +15,25 @@ class RunningTrackerScreen extends StatefulWidget {
 
 class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
   int _steps = 0;
-  StreamSubscription<StepCount>? _stepSubscription;
+  double _distance = 0.0;
+  String _elapsedTime = "00:00";
+  String _accelerationText = "X: 0.0, Y: 0.0, Z: 0.0";
 
   final Location _location = Location();
-  StreamSubscription<LocationData>? _locationSubscription;
   LocationData? _lastLocation;
-  double _distance = 0.0;
-
-  Stopwatch _stopwatch = Stopwatch();
-  late Timer _timer;
-  String _elapsedTime = "00:00";
-
-  bool _isRunning = false;
-  bool _isMapReady = false;
+  StreamSubscription<LocationData>? _locationSubscription;
+  StreamSubscription<StepCount>? _stepSubscription;
+  StreamSubscription? _accelerometerSubscription;
 
   GoogleMapController? _mapController;
   LatLng _currentLatLng = const LatLng(0, 0);
   final Set<Polyline> _polylines = {};
   final List<LatLng> _routeCoords = [];
+
+  Stopwatch _stopwatch = Stopwatch();
+  late Timer _timer;
+  bool _isRunning = false;
+  bool _isMapReady = false;
 
   @override
   void initState() {
@@ -46,11 +48,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
     if (permissionStatus == PermissionStatus.denied) {
       final request = await _location.requestPermission();
       debugPrint("📡 Permission requested: $request");
-
-      if (request != PermissionStatus.granted) {
-        debugPrint("❌ Permission not granted");
-        return;
-      }
+      if (request != PermissionStatus.granted) return;
     }
 
     final currentLocation = await _location.getLocation();
@@ -62,24 +60,41 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
     });
 
     _startStepCounting();
+    _startAccelerometer();
   }
 
   void _startStepCounting() {
     _stepSubscription = Pedometer.stepCountStream.listen((event) {
       debugPrint("👣 Step event: ${event.steps}");
       if (_isRunning) {
-        setState(() {
-          _steps = event.steps;
-        });
+        setState(() => _steps = event.steps);
       }
     }, onError: (e) {
       debugPrint("❌ Step counter error: $e");
     });
   }
 
+  void _startAccelerometer() {
+    _accelerometerSubscription = accelerometerEvents.listen((event) {
+      final ax = event.x.toStringAsFixed(2);
+      final ay = event.y.toStringAsFixed(2);
+      final az = event.z.toStringAsFixed(2);
+
+      setState(() {
+        _accelerationText = "X: $ax, Y: $ay, Z: $az";
+      });
+
+      final magnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
+
+      if (!_isRunning && magnitude > 14.0) {
+        debugPrint("🏃 Motion detected via accelerometer, starting run");
+        _startRun();
+      }
+    });
+  }
+
   void _startLocationTracking() {
     _locationSubscription = _location.onLocationChanged.listen((newLocation) {
-      debugPrint("📡 New location: ${newLocation.latitude}, ${newLocation.longitude}");
       final newLatLng = LatLng(newLocation.latitude!, newLocation.longitude!);
       if (_isRunning && _lastLocation != null) {
         final d = _calculateDistance(
@@ -91,13 +106,14 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
         setState(() {
           _distance += d;
           _routeCoords.add(newLatLng);
-          _polylines.clear();
-          _polylines.add(Polyline(
-            polylineId: const PolylineId("route"),
-            points: _routeCoords,
-            color: Colors.blue,
-            width: 5,
-          ));
+          _polylines
+            ..clear()
+            ..add(Polyline(
+              polylineId: const PolylineId("route"),
+              points: _routeCoords,
+              color: Colors.blue,
+              width: 5,
+            ));
         });
         _mapController?.animateCamera(CameraUpdate.newLatLng(newLatLng));
       }
@@ -109,6 +125,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
   }
 
   void _startRun() {
+    if (_isRunning) return;
     debugPrint("▶️ Starting run");
     _isRunning = true;
     _stopwatch.start();
@@ -140,10 +157,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (_stopwatch.isRunning) {
-        final elapsed = _stopwatch.elapsed;
-        setState(() {
-          _elapsedTime = _formatDuration(elapsed);
-        });
+        setState(() => _elapsedTime = _formatDuration(_stopwatch.elapsed));
       }
     });
   }
@@ -159,8 +173,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
     final dLat = _degToRad(lat2 - lat1);
     final dLon = _degToRad(lon2 - lon1);
     final a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_degToRad(lat1)) * cos(_degToRad(lat2)) *
-            sin(dLon / 2) * sin(dLon / 2);
+        cos(_degToRad(lat1)) * cos(_degToRad(lat2)) * sin(dLon / 2) * sin(dLon / 2);
     final c = 2 * atan2(sqrt(a), sqrt(1 - a));
     return R * c;
   }
@@ -172,6 +185,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
     _timer.cancel();
     _locationSubscription?.cancel();
     _stepSubscription?.cancel();
+    _accelerometerSubscription?.cancel();
     super.dispose();
   }
 
@@ -208,6 +222,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
                 _infoTile("⏱ Time", _elapsedTime),
                 _infoTile("📏 Distance", "${(_distance / 1000).toStringAsFixed(2)} km"),
                 _infoTile("👟 Steps", "$_steps"),
+                _infoTile("🎯 Accel", _accelerationText),
                 const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -221,7 +236,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
                       child: const Text('Reset'),
                     ),
                   ],
-                )
+                ),
               ],
             ),
           )

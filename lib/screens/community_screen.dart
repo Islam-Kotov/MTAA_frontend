@@ -1,11 +1,28 @@
 import 'package:flutter/material.dart';
-import 'friends_screen.dart'; // обязательно добавь этот import
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'friends_screen.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
 
   @override
   State<CommunityScreen> createState() => _CommunityScreenState();
+}
+
+Future<void> sayHello() async {
+  final url = Uri.parse('http://192.168.1.36:8000/api/sayHello');
+
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('api_token');
+
+  await http.get(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+  );
 }
 
 class _CommunityScreenState extends State<CommunityScreen> with TickerProviderStateMixin {
@@ -79,6 +96,12 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
                 },
               ),
             ),
+            ElevatedButton(
+              onPressed: () async {
+                await sayHello();
+              },
+              child: Text('Say hello')
+            )
           ],
         ),
       ),

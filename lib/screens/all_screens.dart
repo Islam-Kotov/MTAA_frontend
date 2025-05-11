@@ -12,3 +12,4 @@ export 'predefined_workout_detail_screen.dart';
 export 'my_own_plan_screen.dart';
 export 'community_screen.dart';
 export 'friends_screen.dart';
+export 'theme_notifier.dart';

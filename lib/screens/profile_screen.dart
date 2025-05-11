@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
@@ -224,17 +225,17 @@ class _ProfileScreen extends State<ProfileScreen> {
       );
     }
 
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
-        backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
       ),
-      backgroundColor: Color.fromRGBO(207, 228, 242, 1),
       body: Column(
         children: [
           Container(
             width: double.infinity,
-            color: Color.fromRGBO(145, 193, 232, 1),
+            color: colors.primaryContainer,
             padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
             child: Column(
               children: [
@@ -280,7 +281,7 @@ class _ProfileScreen extends State<ProfileScreen> {
                   padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: Color.fromRGBO(111, 167, 204, 1),
+                    color: colors.secondaryContainer,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -450,10 +451,8 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(207, 228, 242, 1),
       appBar: AppBar(
         title: const Text('Settings'),
-        backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
       ),
       body: Column(
         children: [
@@ -728,27 +727,19 @@ class _NotificationsSwitchState extends State<NotificationsSwitch> {
   }
 }
 
-class DarkmodeSwitch extends StatefulWidget {
+class DarkmodeSwitch extends StatelessWidget {
   const DarkmodeSwitch({super.key});
 
   @override
-  State<DarkmodeSwitch> createState() => _DarkmodeSwitchState();
-}
-
-class _DarkmodeSwitchState extends State<DarkmodeSwitch> {
-  bool darkmodeOn = false;
-
-  @override
   Widget build(BuildContext context) {
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
+    final isDarkMode = themeNotifier.themeMode == ThemeMode.dark;
+
     return Switch(
-      // This bool value toggles the switch.
-      value: darkmodeOn,
-      activeColor: Color.fromRGBO(111, 167, 204, 1),
-      onChanged: (bool value) {
-        // This is called when the user toggles the switch.
-        setState(() {
-          darkmodeOn = value;
-        });
+      value: isDarkMode,
+      activeColor: const Color.fromRGBO(111, 167, 204, 1),
+      onChanged: (value) {
+        themeNotifier.toggleTheme(value);
       },
     );
   }
@@ -811,9 +802,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('My profile'),
-          backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
         ),
-        backgroundColor: Color.fromRGBO(207, 228, 242, 1),
         resizeToAvoidBottomInset: false,
         body: Column(
           mainAxisSize: MainAxisSize.max,

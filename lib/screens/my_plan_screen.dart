@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'predefined_levels_screen.dart';
+import 'my_own_plan_screen.dart';
 
 class MyPlanScreen extends StatelessWidget {
   const MyPlanScreen({super.key});
@@ -15,30 +16,51 @@ class MyPlanScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Center(
-          child: ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
-              backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              minimumSize: const Size(double.infinity, 80),
-              elevation: 5,
+        child: Column(
+          children: [
+            ElevatedButton.icon(
+              style: _buttonStyle(),
+              icon: const Icon(Icons.fitness_center, size: 28, color: Colors.black87),
+              label: const Text(
+                'Choose a Prepared Workout Plan',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const PredefinedLevelsScreen()),
+                );
+              },
             ),
-            icon: const Icon(Icons.fitness_center, size: 28),
-            label: const Text(
-              'Choose a Prepared Workout Plan',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              style: _buttonStyle(),
+              icon: const Icon(Icons.edit_note, size: 28, color: Colors.black87),
+              label: const Text(
+                'Create My Own Plan',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const MyOwnPlanScreen()),
+                );
+              },
             ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const PredefinedLevelsScreen()),
-              );
-            },
-          ),
+          ],
         ),
       ),
+    );
+  }
+
+  ButtonStyle _buttonStyle() {
+    return ElevatedButton.styleFrom(
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+      backgroundColor: Colors.white,
+      foregroundColor: Colors.black87,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      minimumSize: const Size(double.infinity, 80),
+      elevation: 5,
     );
   }
 }

@@ -92,6 +92,7 @@ class _AuthorizationScreen extends State<AuthorizationScreen> {
                           height: 68,
                           child: TextField(
                             controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
                             decoration: const InputDecoration(
                               contentPadding: EdgeInsets.symmetric(vertical: 22),
                               border: OutlineInputBorder(

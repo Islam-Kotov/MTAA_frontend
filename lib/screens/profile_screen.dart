@@ -543,6 +543,7 @@ class _PasswordResetDialogState extends State<PasswordResetDialog> {
             TextField(
               controller: currentPasswordController,
               obscureText: _obscureCurrentPassword,
+              keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
                 labelText: 'Current Password',
                 suffixIcon: IconButton(
@@ -799,6 +800,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
         backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
       ),
       backgroundColor: Color.fromRGBO(207, 228, 242, 1),
+      resizeToAvoidBottomInset: false,
       body: Column(
         mainAxisSize: MainAxisSize.max,
         children: [

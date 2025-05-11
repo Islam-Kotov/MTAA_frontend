@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:developer';
-
 import 'predefined_workout_detail_screen.dart';
 
 class PredefinedLevelsScreen extends StatefulWidget {
@@ -59,80 +58,77 @@ class _PredefinedLevelsScreenState extends State<PredefinedLevelsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final _colors = Theme.of(context).colorScheme;
-
-    colors = _colors;
+    colors = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Prepared Workouts'),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                Expanded(child: _levelButton('Beginner')),
-                const SizedBox(width: 12),
-                Expanded(child: _levelButton('Advanced')),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          if (selectedLevel != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                '$selectedLevel Workouts',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 700),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    Expanded(child: _levelButton('Beginner')),
+                    const SizedBox(width: 12),
+                    Expanded(child: _levelButton('Advanced')),
+                  ],
                 ),
               ),
-            ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 400),
-              child: isLoading
-                  ? const Center(
-                key: ValueKey('loading'),
-                child: CircularProgressIndicator(),
-              )
-                  : workouts.isEmpty
-                  ? const Center(
-                key: ValueKey('empty'),
-                child: Text('No workouts found for this level.'),
-              )
-                  : ListView.builder(
-                key: ValueKey(selectedLevel),
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                itemCount: workouts.length,
-                itemBuilder: (context, index) {
-                  final workout = workouts[index];
-                  return WorkoutCard(
-                    workout: workout,
-                    onTap: () {
-                      log('📦 Tapped workout ID: ${workout['id']}');
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => PredefinedWorkoutDetailScreen(
-                            workoutId: workout['id'],
-                            imageUrl: '', // imageUrl не используется
-                          ),
-                        ),
+              const SizedBox(height: 24),
+              if (selectedLevel != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    '$selectedLevel Workouts',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 400),
+                  child: isLoading
+                      ? const Center(key: ValueKey('loading'), child: CircularProgressIndicator())
+                      : workouts.isEmpty
+                      ? const Center(key: ValueKey('empty'), child: Text('No workouts found for this level.'))
+                      : ListView.builder(
+                    key: ValueKey(selectedLevel),
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                    itemCount: workouts.length,
+                    itemBuilder: (context, index) {
+                      final workout = workouts[index];
+                      return WorkoutCard(
+                        workout: workout,
+                        onTap: () {
+                          log('📦 Tapped workout ID: ${workout['id']}');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PredefinedWorkoutDetailScreen(
+                                workoutId: workout['id'],
+                                imageUrl: '',
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
-                  );
-                },
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -141,9 +137,7 @@ class _PredefinedLevelsScreenState extends State<PredefinedLevelsScreen> {
     final isActive = selectedLevel == label;
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: isActive
-            ? colors.primary
-            : colors.onPrimary,
+        backgroundColor: isActive ? colors.primary : colors.surfaceVariant,
         foregroundColor: isActive ? Colors.white : Colors.black,
         elevation: 3,
         padding: const EdgeInsets.symmetric(vertical: 18),

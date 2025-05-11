@@ -19,31 +19,19 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
   @override
   void initState() {
     super.initState();
-
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
 
     _preparedFade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.4, curve: Curves.easeIn),
-      ),
+      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.4, curve: Curves.easeIn)),
     );
-
     _customFade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.3, 0.7, curve: Curves.easeIn),
-      ),
+      CurvedAnimation(parent: _controller, curve: const Interval(0.3, 0.7, curve: Curves.easeIn)),
     );
-
     _runFade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.6, 1.0, curve: Curves.easeIn),
-      ),
+      CurvedAnimation(parent: _controller, curve: const Interval(0.6, 1.0, curve: Curves.easeIn)),
     );
 
     _controller.forward();
@@ -55,8 +43,9 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
     super.dispose();
   }
 
-  ButtonStyle _buttonStyle() {
+  ButtonStyle _buttonStyle(Color background) {
     return ElevatedButton.styleFrom(
+      backgroundColor: background,
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       minimumSize: const Size(double.infinity, 80),
@@ -66,110 +55,138 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('My plan'),
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(blurRadius: 6, offset: Offset(0, 3), color: colors.primary ),
-                  ],
-                ),
-                child: const Icon(Icons.event_note, size: 64),
-              ),
-            ),
-            const SizedBox(height: 32),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isTablet = constraints.maxWidth >= 600;
 
-            // 🏋️ Prepared plan
-            FadeTransition(
-              opacity: _preparedFade,
-              child: ElevatedButton.icon(
-                style: _buttonStyle(),
-                icon: const Icon(Icons.fitness_center, size: 28),
-                label: const Text(
-                  'Choose a Prepared Workout Plan',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const PredefinedLevelsScreen()),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // ✏️ Custom plan
-            FadeTransition(
-              opacity: _customFade,
-              child: ElevatedButton.icon(
-                style: _buttonStyle(),
-                icon: const Icon(Icons.edit_note, size: 28),
-                label: const Text(
-                  'Create My Own Plan',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const MyOwnPlanScreen()),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 32),
-
-            // 🏃‍♂️ Квадратная кнопка Go for a run (слева)
-            FadeTransition(
-              opacity: _runFade,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const RunningTrackerScreen()),
-                    );
-                  },
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
                   child: Container(
-                    height: 160,
-                    width: 160,
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: const [
-                        BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
-                      ],
-                    ),
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.directions_run, size: 40),
-                        SizedBox(height: 10),
-                        Text(
-                          'Go for a run',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
+                          color: colorScheme.primary.withOpacity(0.4),
                         ),
                       ],
+                      color: colorScheme.surface,
                     ),
+                    child: Icon(Icons.event_note, size: 64, color: colorScheme.primary),
                   ),
                 ),
-              ),
+                const SizedBox(height: 32),
+
+                Wrap(
+                  spacing: 20,
+                  runSpacing: 24,
+                  children: [
+                    // 🏋️ Prepared plan
+                    SizedBox(
+                      width: isTablet ? (constraints.maxWidth - 60) / 2 : double.infinity,
+                      child: FadeTransition(
+                        opacity: _preparedFade,
+                        child: ElevatedButton.icon(
+                          style: _buttonStyle(colorScheme.primary),
+                          icon: const Icon(Icons.fitness_center, size: 28),
+                          label: Text(
+                            'Choose a Prepared Workout Plan',
+                            style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const PredefinedLevelsScreen()),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+
+                    // ✏️ Custom plan
+                    SizedBox(
+                      width: isTablet ? (constraints.maxWidth - 60) / 2 : double.infinity,
+                      child: FadeTransition(
+                        opacity: _customFade,
+                        child: ElevatedButton.icon(
+                          style: _buttonStyle(colorScheme.primary),
+                          icon: const Icon(Icons.edit_note, size: 28),
+                          label: Text(
+                            'Create My Own Plan',
+                            style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const MyOwnPlanScreen()),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+
+                    // 🏃‍♂️ Run
+                    SizedBox(
+                      width: isTablet ? (constraints.maxWidth - 60) / 2 : double.infinity,
+                      child: FadeTransition(
+                        opacity: _runFade,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const RunningTrackerScreen()),
+                            );
+                          },
+                          child: Container(
+                            height: 160,
+                            decoration: BoxDecoration(
+                              color: colorScheme.surfaceVariant,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 6,
+                                  offset: Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.directions_run, size: 40, color: colorScheme.primary),
+                                const SizedBox(height: 10),
+                                Text(
+                                  'Go for a run',
+                                  style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

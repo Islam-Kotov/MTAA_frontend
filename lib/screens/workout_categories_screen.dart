@@ -53,92 +53,113 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Workout Categories'),
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
       ),
-      body: isLoading
-          ? const Center(
-        child: CircularProgressIndicator(color: Color(0xFF3984ad)),
-      )
-          : hasError
-          ? Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: colors.error),
-            const SizedBox(height: 16),
-            const Text('Could not load categories.', style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 8),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.refresh),
-              label: const Text('Try Again'),
-              onPressed: () {
-                setState(() {
-                  isLoading = true;
-                  hasError = false;
-                });
-                fetchCategories();
-              },
-            ),
-          ],
-        ),
-      )
-          : ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final category = categories[index];
-          return TweenAnimationBuilder(
-            tween: Tween<double>(begin: 0, end: 1),
-            duration: Duration(milliseconds: 400 + index * 100),
-            builder: (context, value, child) => Opacity(
-              opacity: value,
-              child: Transform.translate(
-                offset: Offset(0, 20 * (1 - value)),
-                child: child,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isTablet = constraints.maxWidth >= 600;
+
+          if (isLoading) {
+            return const Center(child: CircularProgressIndicator(color: Color(0xFF3984ad)));
+          }
+
+          if (hasError) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.error_outline, size: 48, color: colorScheme.error),
+                  const SizedBox(height: 16),
+                  Text('Could not load categories.',
+                      style: Theme.of(context).textTheme.bodyLarge),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Try Again'),
+                    onPressed: () {
+                      setState(() {
+                        isLoading = true;
+                        hasError = false;
+                      });
+                      fetchCategories();
+                    },
+                  ),
+                ],
               ),
-            ),
-            child: GestureDetector(
-              onTap: () {
-                log('➡️ Opening category: ${category['name']}');
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => WorkoutsListScreen(
-                      categoryName: category['name'],
+            );
+          }
+
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Wrap(
+              spacing: 20,
+              runSpacing: 20,
+              children: List.generate(categories.length, (index) {
+                final category = categories[index];
+                final width = isTablet ? (constraints.maxWidth - 52) / 2 : constraints.maxWidth;
+
+                return TweenAnimationBuilder(
+                  tween: Tween<double>(begin: 0, end: 1),
+                  duration: Duration(milliseconds: 400 + index * 100),
+                  builder: (context, value, child) => Opacity(
+                    opacity: value,
+                    child: Transform.translate(
+                      offset: Offset(0, 20 * (1 - value)),
+                      child: child,
                     ),
                   ),
-                );
-              },
-              child: Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                margin: const EdgeInsets.only(bottom: 16),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                  child: Row(
-                    children: [
-                      Icon(Icons.fitness_center, size: 36),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Text(
-                          category['name'],
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
+                  child: GestureDetector(
+                    onTap: () {
+                      log('➡️ Opening category: ${category['name']}');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => WorkoutsListScreen(
+                            categoryName: category['name'],
+                          ),
+                        ),
+                      );
+                    },
+                    child: SizedBox(
+                      width: width,
+                      child: Card(
+                        color: colorScheme.surface,
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                          child: Row(
+                            children: [
+                              Icon(Icons.fitness_center,
+                                  size: 36, color: colorScheme.primary),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  category['name'],
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.onSurface,
+                                  ),
+                                ),
+                              ),
+                              Icon(Icons.arrow_forward_ios,
+                                  color: colorScheme.onSurface.withOpacity(0.6)),
+                            ],
                           ),
                         ),
                       ),
-                      const Icon(Icons.arrow_forward_ios),
-                    ],
+                    ),
                   ),
-                ),
-              ),
+                );
+              }),
             ),
           );
         },

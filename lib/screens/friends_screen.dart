@@ -279,11 +279,8 @@ class _FriendsScreenState extends State<FriendsScreen> with TickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(207, 228, 242, 1),
       appBar: AppBar(
         title: const Text('My Friends'),
-        backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
-        elevation: 2,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -307,8 +304,6 @@ class _FriendsScreenState extends State<FriendsScreen> with TickerProviderStateM
                   icon: const Icon(Icons.person_add_alt_1),
                   label: const Text('Add Friend'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(58, 132, 173, 1),
-                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),

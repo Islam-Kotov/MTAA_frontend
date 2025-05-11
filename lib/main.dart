@@ -36,14 +36,9 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
     secondaryContainer: Color.fromRGBO(65, 65, 66, 1),
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
-    style: ButtonStyle(
-      iconColor: WidgetStatePropertyAll(Colors.white),
-      textStyle: WidgetStatePropertyAll(
-        TextStyle(
-          color: Colors.white,
-          
-        )
-      )
+    style: ElevatedButton.styleFrom(
+      foregroundColor: Colors.white,
+      iconColor: Colors.white,
     )
   )
 );

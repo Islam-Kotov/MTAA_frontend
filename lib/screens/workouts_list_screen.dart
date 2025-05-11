@@ -42,12 +42,15 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('api_token');
     setState(() => apiToken = token);
-    await Future.wait([fetchWorkouts(), fetchUserPlanIds()]);
+
+    await fetchUserPlanIds();
+    await fetchWorkouts();
   }
 
   Future<void> fetchUserPlanIds() async {
     if (apiToken == null) return;
     final uri = Uri.parse('http://192.168.1.36:8000/api/plan');
+
     try {
       final response = await http.get(uri, headers: {
         'Authorization': 'Bearer $apiToken',
@@ -56,7 +59,12 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final ids = data.map<int>((e) => e['workout_id'] as int).toSet();
+        final ids = <int>{};
+        for (var item in data) {
+          if (item['workout_id'] != null) {
+            ids.add(item['workout_id']);
+          }
+        }
         setState(() => alreadyAdded = ids);
       } else {
         log('⚠️ Failed to fetch plan: ${response.statusCode}');
@@ -104,9 +112,8 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
         filteredWorkouts = type == null
             ? workouts
             : workouts
-            .where((w) =>
-            (w['exercise_type']?.toLowerCase() ?? '')
-                .contains(type.toLowerCase()))
+            .where((w) => (w['exercise_type']?.toLowerCase() ?? '')
+            .contains(type.toLowerCase()))
             .toList();
         isFiltering = false;
       });
@@ -181,7 +188,8 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
       );
 
       if (response.statusCode == 200) {
-        await fetchUserPlanIds();
+        await fetchUserPlanIds(); // force update
+        setState(() {}); // redraw
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('✅ Exercise added to your plan')),
         );
@@ -213,11 +221,9 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
             tooltip: 'Filter by type',
             onSelected: applyFilter,
             itemBuilder: (context) => [
-              ...filters.map((type) =>
-                  PopupMenuItem(value: type, child: Text(type))),
+              ...filters.map((type) => PopupMenuItem(value: type, child: Text(type))),
               const PopupMenuDivider(),
-              const PopupMenuItem(
-                  value: '__clear__', child: Text('Clear filter')),
+              const PopupMenuItem(value: '__clear__', child: Text('Clear filter')),
             ],
           ),
         ],
@@ -243,110 +249,76 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
             child: isFiltering
                 ? const Center(child: CircularProgressIndicator())
                 : filteredWorkouts.isEmpty
-                ? const Center(
-                child: Text('No workouts found for this filter.'))
+                ? const Center(child: Text('No workouts found for this filter.'))
                 : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: filteredWorkouts.length,
               itemBuilder: (context, index) {
                 final workout = filteredWorkouts[index];
                 final imageUrl = workout['exercise_photo'];
-                final heroTag =
-                    'exercise-image-${workout['id']}';
+                final heroTag = 'exercise-image-${workout['id']}';
+                final isAdded = alreadyAdded.contains(workout['id']);
 
-                return TweenAnimationBuilder(
-                  tween: Tween<double>(begin: 0, end: 1),
-                  duration:
-                  Duration(milliseconds: 400 + index * 100),
-                  builder: (context, value, child) => Opacity(
-                    opacity: value,
-                    child: Transform.translate(
-                      offset: Offset(0, 20 * (1 - value)),
-                      child: child,
-                    ),
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Card(
-                    margin:
-                    const EdgeInsets.only(bottom: 16),
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => WorkoutDetailScreen(
-                              workoutId: workout['id'],
-                              heroTag: heroTag,
-                            ),
-                          ),
-                        );
-                      },
-                      borderRadius: BorderRadius.circular(14),
-                      child: ListTile(
-                        contentPadding:
-                        const EdgeInsets.all(14),
-                        leading: Hero(
-                          tag: heroTag,
-                          child: ClipRRect(
-                            borderRadius:
-                            BorderRadius.circular(8),
-                            child: imageUrl != null
-                                ? Image.network(
-                              imageUrl,
-                              width: 60,
-                              height: 60,
-                              fit: BoxFit.cover,
-                              errorBuilder:
-                                  (_, __, ___) =>
-                                  Container(
-                                    width: 60,
-                                    height: 60,
-                                    color: Colors
-                                        .grey.shade300,
-                                    child: const Icon(Icons
-                                        .image_not_supported),
-                                  ),
-                            )
-                                : Container(
-                              width: 60,
-                              height: 60,
-                              color:
-                              Colors.grey.shade300,
-                              child: const Icon(Icons
-                                  .image_not_supported),
-                            ),
+                  child: ListTile(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => WorkoutDetailScreen(
+                            workoutId: workout['id'],
+                            heroTag: heroTag,
                           ),
                         ),
-                        title: Text(
-                          workout['exercise_name'] ?? 'Unnamed',
-                          style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w600),
-                        ),
-                        subtitle: Text(
-                          workout['exercise_type'] ?? '',
-                          style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black54),
-                        ),
-                        trailing: IconButton(
-                          icon: Icon(
-                            alreadyAdded.contains(workout['id'])
-                                ? Icons.check_circle
-                                : Icons.add_circle,
-                            size: 32,
-                            color:
-                            alreadyAdded.contains(workout['id'])
-                                ? Colors.green
-                                : Colors.blue,
+                      );
+                    },
+                    contentPadding: const EdgeInsets.all(14),
+                    leading: Hero(
+                      tag: heroTag,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: imageUrl != null
+                            ? Image.network(
+                          imageUrl,
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            width: 60,
+                            height: 60,
+                            color: Colors.grey.shade300,
+                            child: const Icon(Icons.image_not_supported),
                           ),
-                          onPressed: () =>
-                              showAddDialog(workout['id']),
+                        )
+                            : Container(
+                          width: 60,
+                          height: 60,
+                          color: Colors.grey.shade300,
+                          child: const Icon(Icons.image_not_supported),
                         ),
                       ),
+                    ),
+                    title: Text(
+                      workout['exercise_name'] ?? 'Unnamed',
+                      style: const TextStyle(
+                          fontSize: 17, fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      workout['exercise_type'] ?? '',
+                      style: const TextStyle(fontSize: 14, color: Colors.black54),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(
+                        isAdded ? Icons.check_circle : Icons.add_circle,
+                        size: 32,
+                        color: isAdded ? Colors.green : Colors.blue,
+                      ),
+                      onPressed: () => showAddDialog(workout['id']),
                     ),
                   ),
                 );

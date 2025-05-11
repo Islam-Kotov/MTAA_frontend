@@ -53,12 +53,11 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
-      // backgroundColor: const Color.fromRGBO(207, 228, 242, 1),
       appBar: AppBar(
         title: const Text('Workout Categories'),
-        // backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
-        elevation: 2,
       ),
       body: isLoading
           ? const Center(
@@ -69,7 +68,7 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            Icon(Icons.error_outline, size: 48, color: colors.error),
             const SizedBox(height: 16),
             const Text('Could not load categories.', style: TextStyle(fontSize: 16)),
             const SizedBox(height: 8),
@@ -124,7 +123,7 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
                   child: Row(
                     children: [
-                      const Icon(Icons.fitness_center, size: 36, color: Colors.blueAccent),
+                      Icon(Icons.fitness_center, size: 36),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Text(
@@ -132,11 +131,10 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black87,
                           ),
                         ),
                       ),
-                      const Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                      const Icon(Icons.arrow_forward_ios),
                     ],
                   ),
                 ),

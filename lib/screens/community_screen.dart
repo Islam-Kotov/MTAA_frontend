@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'friends_screen.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'dart:convert';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -29,6 +31,8 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
   late AnimationController _controller;
   late Animation<double> _friendsFade;
 
+  late final WebSocketChannel channel;
+
   @override
   void initState() {
     super.initState();
@@ -46,11 +50,24 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
     );
 
     _controller.forward();
+
+    channel = WebSocketChannel.connect(
+      Uri.parse('ws://192.168.1.36:8080/app/cfdjqmnqx0vggflribbd?protocol=7&client=js&version=1.0&format=json'),
+    );
+    channel.sink.add(jsonEncode(
+      {
+        'event': 'pusher:subscribe',
+        'data': {
+          'channel': 'test'
+        }
+      }
+    ));
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    channel.sink.close();
     super.dispose();
   }
 
@@ -101,6 +118,14 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
                 await sayHello();
               },
               child: Text('Say hello')
+            ),
+            Container(
+              child: StreamBuilder(
+                stream: channel.stream,
+                builder: (context, snapshot) {
+                  return Text(snapshot.hasData ? '${snapshot.data}' : '');
+                },
+              ),
             )
           ],
         ),

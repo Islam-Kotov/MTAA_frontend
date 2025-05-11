@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:semestral_project/screens/all_screens.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import 'dart:convert';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,45 +9,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreen extends State<HomeScreen> {
-  late final WebSocketChannel channel;
-
-  @override
-  void initState() {
-    super.initState();
-
-    channel = WebSocketChannel.connect(
-      Uri.parse('ws://192.168.1.36:8080/app/cfdjqmnqx0vggflribbd?protocol=7&client=js&version=1.0&format=json'),
-    );
-
-    channel.sink.add(jsonEncode(
-      {
-        'event': 'pusher:subscribe',
-        'data': {
-          'channel': 'test'
-        }
-      }
-    ));
-
-    channel.stream.listen((message) {
-      // final data = jsonDecode(message);
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: StreamBuilder(
-                stream: channel.stream,
-                builder: (context, snapshot) {
-                  return Text(snapshot.hasData ? '${snapshot.data}' : '');
-                },
-              ),
-            ),
-          );
-        }
-      });
-    });
-  }
-
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
@@ -94,11 +53,5 @@ class _HomeScreen extends State<HomeScreen> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    channel.sink.close();
-    super.dispose();
   }
 }

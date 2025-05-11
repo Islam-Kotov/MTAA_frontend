@@ -34,11 +34,8 @@ class WorkoutDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(207, 228, 242, 1),
       appBar: AppBar(
         title: const Text("Exercise Detail"),
-        backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
-        elevation: 2,
       ),
       body: FutureBuilder<Map?>(
         future: fetchWorkout(),
@@ -184,12 +181,10 @@ class WorkoutDetailScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            // color: Colors.black.withOpacity(0.04),
             blurRadius: 6,
             offset: const Offset(0, 2),
           )
@@ -198,7 +193,7 @@ class WorkoutDetailScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: multiline ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
-          Icon(icon, size: 28, color: Colors.blueGrey),
+          Icon(icon, size: 28),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -209,7 +204,6 @@ class WorkoutDetailScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blueGrey,
                     letterSpacing: 0.5,
                   ),
                 ),

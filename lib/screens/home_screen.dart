@@ -34,9 +34,6 @@ class _HomeScreen extends State<HomeScreen> {
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        backgroundColor: Color.fromRGBO(57, 132, 173, 1),
-        unselectedItemColor: Color.fromRGBO(0, 0, 0, 1),
-        selectedItemColor: Color.fromRGBO(76, 21, 152, 1),
         iconSize: 30,
         items: const [
           BottomNavigationBarItem(

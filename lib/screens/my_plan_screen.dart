@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'predefined_levels_screen.dart';
 import 'my_own_plan_screen.dart';
+import 'running_tracker_screen.dart';
 
 class MyPlanScreen extends StatefulWidget {
   const MyPlanScreen({super.key});
@@ -13,6 +14,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
   late AnimationController _controller;
   late Animation<double> _preparedFade;
   late Animation<double> _customFade;
+  late Animation<double> _runFade;
 
   @override
   void initState() {
@@ -26,14 +28,21 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
     _preparedFade = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+        curve: const Interval(0.0, 0.4, curve: Curves.easeIn),
       ),
     );
 
     _customFade = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.3, 1.0, curve: Curves.easeIn),
+        curve: const Interval(0.3, 0.7, curve: Curves.easeIn),
+      ),
+    );
+
+    _runFade = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.6, 1.0, curve: Curves.easeIn),
       ),
     );
 
@@ -66,10 +75,28 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
         backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
         elevation: 2,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 🗓️ Иконка плана сверху
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+                  ],
+                ),
+                child: const Icon(Icons.event_note, size: 64, color: Color.fromRGBO(57, 132, 173, 1)),
+              ),
+            ),
+            const SizedBox(height: 32),
+
+            // 🏋️ Prepared plan
             FadeTransition(
               opacity: _preparedFade,
               child: ElevatedButton.icon(
@@ -88,6 +115,8 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
               ),
             ),
             const SizedBox(height: 24),
+
+            // ✏️ Custom plan
             FadeTransition(
               opacity: _customFade,
               child: ElevatedButton.icon(
@@ -103,6 +132,46 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                     MaterialPageRoute(builder: (_) => const MyOwnPlanScreen()),
                   );
                 },
+              ),
+            ),
+            const SizedBox(height: 32),
+
+            // 🏃‍♂️ Квадратная кнопка Go for a run (слева)
+            FadeTransition(
+              opacity: _runFade,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const RunningTrackerScreen()),
+                    );
+                  },
+                  child: Container(
+                    height: 160,
+                    width: 160,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+                      ],
+                    ),
+                    child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.directions_run, size: 40, color: Colors.black87),
+                        SizedBox(height: 10),
+                        Text(
+                          'Go for a run',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

@@ -66,9 +66,9 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
   void _startStepCounting() {
     _stepSubscription = Pedometer.stepCountStream.listen((event) {
       debugPrint("👣 Step event: ${event.steps}");
-      if (_isRunning) {
-        setState(() => _steps = event.steps);
-      }
+      setState(() {
+        _steps = event.steps;
+      });
     }, onError: (e) {
       debugPrint("❌ Step counter error: $e");
     });
@@ -95,6 +95,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
 
   void _startLocationTracking() {
     _locationSubscription = _location.onLocationChanged.listen((newLocation) {
+      debugPrint("📡 New location: ${newLocation.latitude}, ${newLocation.longitude}");
       final newLatLng = LatLng(newLocation.latitude!, newLocation.longitude!);
       if (_isRunning && _lastLocation != null) {
         final d = _calculateDistance(

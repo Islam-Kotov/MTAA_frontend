@@ -13,3 +13,4 @@ export 'my_own_plan_screen.dart';
 export 'community_screen.dart';
 export 'friends_screen.dart';
 export 'theme_notifier.dart';
+export 'running_tracker_screen.dart';

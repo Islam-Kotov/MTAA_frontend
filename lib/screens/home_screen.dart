@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:semestral_project/screens/all_screens.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import 'dart:convert';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -89,11 +87,5 @@ class _HomeScreen extends State<HomeScreen> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    channel.sink.close();
-    super.dispose();
   }
 }

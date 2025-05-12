@@ -117,7 +117,7 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
                   onPressed: () async {
                     await sayHello();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('👋 Hello sent to server')),
+                      const SnackBar(content: Text('Hello sent to server')),
                     );
                   },
                 ),

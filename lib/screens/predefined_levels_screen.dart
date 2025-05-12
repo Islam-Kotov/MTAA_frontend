@@ -41,13 +41,13 @@ class _PredefinedLevelsScreenState extends State<PredefinedLevelsScreen> {
           workouts = data;
         });
       } else {
-        log('❌ Failed to load workouts: ${response.statusCode}', error: response.body);
+        log('Failed to load workouts: ${response.statusCode}', error: response.body);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to load workouts: ${response.statusCode}')),
         );
       }
     } catch (e) {
-      log('❗ Error loading workouts', error: e);
+      log('Error loading workouts', error: e);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error loading workouts')),
       );

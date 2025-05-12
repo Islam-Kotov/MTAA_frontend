@@ -43,11 +43,11 @@ class _PredefinedWorkoutDetailScreenState
           isLoading = false;
         });
       } else {
-        log('❌ Failed to load workout: ${response.statusCode}');
+        log('Failed to load workout: ${response.statusCode}');
         setState(() => isLoading = false);
       }
     } catch (e) {
-      log('❗ Error fetching workout', error: e);
+      log('Error fetching workout', error: e);
       setState(() => isLoading = false);
     }
   }

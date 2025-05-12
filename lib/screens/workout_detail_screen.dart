@@ -15,18 +15,18 @@ class WorkoutDetailScreen extends StatelessWidget {
 
   Future<Map?> fetchWorkout() async {
     final uri = Uri.parse('http://192.168.1.36:8000/api/workouts/$workoutId');
-    log('📡 Fetching workout details from: $uri');
+    log('Fetching workout details from: $uri');
 
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        log('❌ Workout not found: ${response.statusCode}', error: response.body);
+        log('Workout not found: ${response.statusCode}', error: response.body);
         return null;
       }
     } catch (e) {
-      log('❗ Exception while loading workout', error: e);
+      log('Exception while loading workout', error: e);
       return null;
     }
   }

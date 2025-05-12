@@ -67,10 +67,10 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
         }
         setState(() => alreadyAdded = ids);
       } else {
-        log('⚠️ Failed to fetch plan: ${response.statusCode}');
+        log('Failed to fetch plan: ${response.statusCode}');
       }
     } catch (e) {
-      log('❗ Error fetching user plan', error: e);
+      log('Error fetching user plan', error: e);
     }
   }
 
@@ -91,11 +91,11 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
           isLoading = false;
         });
       } else {
-        log('❌ Server error: ${response.statusCode}');
+        log('Server error: ${response.statusCode}');
         setState(() => isLoading = false);
       }
     } catch (e) {
-      log('❗ Error fetching workouts', error: e);
+      log('Error fetching workouts', error: e);
       setState(() => isLoading = false);
     }
   }
@@ -191,16 +191,16 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
         await fetchUserPlanIds(); // force update
         setState(() {}); // redraw
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('✅ Exercise added to your plan')),
+          const SnackBar(content: Text('Exercise added to your plan')),
         );
       } else {
-        log('❌ Failed to add: ${response.statusCode}', error: response.body);
+        log('Failed to add: ${response.statusCode}', error: response.body);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to add exercise')),
         );
       }
     } catch (e) {
-      log('❗ Error adding exercise', error: e);
+      log('Error adding exercise', error: e);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error adding exercise')),
       );

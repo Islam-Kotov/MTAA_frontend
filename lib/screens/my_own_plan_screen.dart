@@ -31,7 +31,7 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
     final token = prefs.getString('api_token');
 
     if (token == null) {
-      log('❌ No token found');
+      log('No token found');
       setState(() => isLoading = false);
       return;
     }
@@ -51,7 +51,7 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
         isLoading = false;
       });
     } else {
-      log('❌ Failed to fetch plan: ${response.statusCode}');
+      log('Failed to fetch plan: ${response.statusCode}');
       setState(() => isLoading = false);
     }
   }
@@ -66,10 +66,10 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
     if (response.statusCode == 200) {
       fetchPlan();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('✅ Exercise removed')),
+        const SnackBar(content: Text('Exercise removed')),
       );
     } else {
-      log('❌ Failed to remove: ${response.statusCode}');
+      log('Failed to remove: ${response.statusCode}');
     }
   }
 
@@ -133,10 +133,10 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
     if (response.statusCode == 200) {
       fetchPlan();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('✅ Exercise updated')),
+        const SnackBar(content: Text('Exercise updated')),
       );
     } else {
-      log('❌ Failed to update: ${response.statusCode}');
+      log('Failed to update: ${response.statusCode}');
     }
   }
 

@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'all_screens.dart';
 
 Future<bool> createUser(String name, String email, String password, String passwordConfirmation) async {
-  final url = Uri.parse('http://192.168.1.36:8000/api/auth/register');
+  final url = Uri.parse('http://147.175.163.45:8000/api/auth/register');
 
   final response = await http.post(
     url,

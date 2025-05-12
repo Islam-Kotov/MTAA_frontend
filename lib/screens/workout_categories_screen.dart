@@ -23,7 +23,7 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
   }
 
   Future<void> fetchCategories() async {
-    final uri = Uri.parse('http://192.168.1.36:8000/api/categories');
+    final uri = Uri.parse('http://147.175.163.45:8000/api/categories');
     log('Fetching categories from $uri');
 
     try {

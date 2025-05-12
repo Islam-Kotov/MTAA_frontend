@@ -54,7 +54,7 @@ class _FriendsScreenState extends State<FriendsScreen> with TickerProviderStateM
     }
 
     final response = await http.get(
-      Uri.parse('http://192.168.1.36:8000/api/friends'),
+      Uri.parse('http://147.175.163.45:8000/api/friends'),
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
@@ -80,7 +80,7 @@ class _FriendsScreenState extends State<FriendsScreen> with TickerProviderStateM
     final token = prefs.getString('api_token');
     if (token == null) return;
 
-    final uri = Uri.parse('http://192.168.1.36:8000/api/friends/$action/$id');
+    final uri = Uri.parse('http://147.175.163.45:8000/api/friends/$action/$id');
     final response = await http.post(uri, headers: {
       'Authorization': 'Bearer $token',
       'Accept': 'application/json',
@@ -98,7 +98,7 @@ class _FriendsScreenState extends State<FriendsScreen> with TickerProviderStateM
     final token = prefs.getString('api_token');
     if (token == null) return;
 
-    final uri = Uri.parse('http://192.168.1.36:8000/api/friends/remove/$id');
+    final uri = Uri.parse('http://147.175.163.45:8000/api/friends/remove/$id');
     final response = await http.delete(uri, headers: {
       'Authorization': 'Bearer $token',
       'Accept': 'application/json',
@@ -162,7 +162,7 @@ class _FriendsScreenState extends State<FriendsScreen> with TickerProviderStateM
                     if (token == null) return;
 
                     final response = await http.post(
-                      Uri.parse('http://192.168.1.36:8000/api/friends/send'),
+                      Uri.parse('http://147.175.163.45:8000/api/friends/send'),
                       headers: {
                         'Authorization': 'Bearer $token',
                         'Accept': 'application/json',

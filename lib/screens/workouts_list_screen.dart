@@ -49,7 +49,7 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
 
   Future<void> fetchUserPlanIds() async {
     if (apiToken == null) return;
-    final uri = Uri.parse('http://192.168.1.36:8000/api/plan');
+    final uri = Uri.parse('http://147.175.163.45:8000/api/plan');
 
     try {
       final response = await http.get(uri, headers: {
@@ -76,7 +76,7 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
 
   Future<void> fetchWorkouts() async {
     final uri = Uri.parse(
-        'http://192.168.1.36:8000/api/workouts?category=${Uri.encodeComponent(widget.categoryName)}');
+        'http://147.175.163.45:8000/api/workouts?category=${Uri.encodeComponent(widget.categoryName)}');
     try {
       final response = await http.get(uri, headers: {
         'Authorization': 'Bearer $apiToken',
@@ -171,7 +171,7 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
   }
 
   Future<void> addExerciseToPlan(int workoutId, int sets, int reps) async {
-    final uri = Uri.parse('http://192.168.1.36:8000/api/plan/add');
+    final uri = Uri.parse('http://147.175.163.45:8000/api/plan/add');
 
     try {
       final response = await http.post(

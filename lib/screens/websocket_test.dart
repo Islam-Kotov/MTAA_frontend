@@ -16,7 +16,7 @@ class _TestScreen extends State<TestScreen> {
   void initState() {
     super.initState();
     channel = WebSocketChannel.connect(
-      Uri.parse('ws://192.168.1.36:8080/app/cfdjqmnqx0vggflribbd?protocol=7&client=js&version=1.0&format=json'),
+      Uri.parse('ws://147.175.163.45:8080/app/cfdjqmnqx0vggflribbd?protocol=7&client=js&version=1.0&format=json'),
     );
     channel.sink.add(jsonEncode(
       {

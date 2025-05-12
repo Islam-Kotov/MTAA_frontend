@@ -13,7 +13,7 @@ class CommunityScreen extends StatefulWidget {
 }
 
 Future<void> sayHello() async {
-  final url = Uri.parse('http://192.168.1.36:8000/api/sayHello');
+  final url = Uri.parse('http://147.175.163.45:8000/api/sayHello');
 
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('api_token');
@@ -51,7 +51,7 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
     _controller.forward();
 
     channel = WebSocketChannel.connect(
-      Uri.parse('ws://192.168.1.36:8080/app/cfdjqmnqx0vggflribbd?protocol=7&client=js&version=1.0&format=json'),
+      Uri.parse('ws://147.175.163.45:8080/app/cfdjqmnqx0vggflribbd?protocol=7&client=js&version=1.0&format=json'),
     );
     channel.sink.add(jsonEncode(
       {

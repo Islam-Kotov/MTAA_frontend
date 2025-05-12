@@ -24,7 +24,7 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
 
   Future<void> fetchCategories() async {
     final uri = Uri.parse('http://192.168.1.36:8000/api/categories');
-    log('📡 Fetching categories from $uri');
+    log('Fetching categories from $uri');
 
     try {
       final response = await http.get(uri);
@@ -34,16 +34,16 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
           isLoading = false;
           hasError = false;
         });
-        log('✅ Categories loaded: ${categories.length}');
+        log('Categories loaded: ${categories.length}');
       } else {
-        log('❌ Failed to load categories: ${response.statusCode}', error: response.body);
+        log('Failed to load categories: ${response.statusCode}', error: response.body);
         setState(() {
           isLoading = false;
           hasError = true;
         });
       }
     } catch (e) {
-      log('❗ Exception during fetch', error: e);
+      log('Exception during fetch', error: e);
       setState(() {
         isLoading = false;
         hasError = true;
@@ -112,7 +112,7 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
                   ),
                   child: GestureDetector(
                     onTap: () {
-                      log('➡️ Opening category: ${category['name']}');
+                      log('Opening category: ${category['name']}');
                       Navigator.push(
                         context,
                         MaterialPageRoute(

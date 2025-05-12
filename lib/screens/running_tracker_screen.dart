@@ -45,16 +45,16 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
 
   Future<void> _initialize() async {
     final permissionStatus = await _location.hasPermission();
-    debugPrint("🔍 Permission status: $permissionStatus");
+    debugPrint("Permission status: $permissionStatus");
 
     if (permissionStatus == PermissionStatus.denied) {
       final request = await _location.requestPermission();
-      debugPrint("📡 Permission requested: $request");
+      debugPrint("Permission requested: $request");
       if (request != PermissionStatus.granted) return;
     }
 
     final currentLocation = await _location.getLocation();
-    debugPrint("📍 Current location: ${currentLocation.latitude}, ${currentLocation.longitude}");
+    debugPrint("Current location: ${currentLocation.latitude}, ${currentLocation.longitude}");
 
     if (!mounted) return;
     setState(() {
@@ -71,7 +71,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
       debugPrint("👣 Step event: ${event.steps}");
       if (!mounted) return;
       setState(() => _steps = event.steps);
-    }, onError: (e) => debugPrint("❌ Step counter error: $e"));
+    }, onError: (e) => debugPrint("Step counter error: $e"));
   }
 
   void _startAccelerometer() {
@@ -85,7 +85,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
 
       final magnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
       if (!_isRunning && magnitude > 14.0) {
-        debugPrint("🏃 Motion detected via accelerometer, starting run");
+        debugPrint("Motion detected via accelerometer, starting run");
         _startRun();
       }
 
@@ -102,7 +102,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
 
   void _startLocationTracking() {
     _locationSubscription = _location.onLocationChanged.listen((newLocation) {
-      debugPrint("📡 New location: ${newLocation.latitude}, ${newLocation.longitude}");
+      debugPrint("New location: ${newLocation.latitude}, ${newLocation.longitude}");
       final newLatLng = LatLng(newLocation.latitude!, newLocation.longitude!);
 
       if (_isRunning && _lastLocation != null) {
@@ -130,7 +130,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
       _lastLocation = newLocation;
       if (!mounted) return;
       setState(() => _currentLatLng = newLatLng);
-    }, onError: (e) => debugPrint("❌ Location tracking error: $e"));
+    }, onError: (e) => debugPrint("Location tracking error: $e"));
   }
 
   void _startRun() {

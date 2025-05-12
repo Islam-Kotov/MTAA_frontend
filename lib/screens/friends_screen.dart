@@ -28,7 +28,7 @@ class _FriendsScreenState extends State<FriendsScreen> with TickerProviderStateM
     super.initState();
     fetchFriendsData();
 
-    // Ступенчатая анимация
+
     Future.delayed(const Duration(milliseconds: 150), () {
       if (mounted) setState(() => _opacityFriends = 1.0);
     });

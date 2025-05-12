@@ -221,7 +221,31 @@ class _ProfileScreen extends State<ProfileScreen> {
 
     if (profileData == null) {
       return Scaffold(
-        body: Center(child: Text('Failed to load profile.')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Failed to load profile.'),
+              SizedBox(height: 4),
+              ListTile(
+                leading: Icon(Icons.logout_sharp, size: 32),
+                title: Text(
+                  'Logout',
+                  style: TextStyle(
+                    fontSize: 22,
+                  ),
+                ),
+                trailing: Icon(Icons.arrow_forward_ios),
+                onTap: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AuthorizationScreen()),
+                  );
+                },
+              ),
+            ],
+          )
+        ),
       );
     }
 

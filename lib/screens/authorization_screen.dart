@@ -67,7 +67,7 @@ class _AuthorizationScreenState extends State<AuthorizationScreen> {
   Widget _buildMobileLayout() {
     return Center(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
         child: Column(
           children: [
             const Text('FitLife',
@@ -209,6 +209,24 @@ class _AuthorizationScreenState extends State<AuthorizationScreen> {
             );
           },
           child: const Text('Create an account',
+              style: TextStyle(fontSize: 20, color: Colors.black)),
+        ),
+        const SizedBox(height: 8),
+        FilledButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
+            minimumSize: const Size.fromHeight(56),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          },
+          child: const Text('Offline mode',
               style: TextStyle(fontSize: 20, color: Colors.black)),
         ),
       ],

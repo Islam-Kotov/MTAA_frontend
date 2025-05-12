@@ -33,13 +33,9 @@ class WorkoutDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Exercise Detail"),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
       ),
       body: FutureBuilder<Map?>(
         future: fetchWorkout(),
@@ -194,12 +190,10 @@ class WorkoutDetailScreen extends StatelessWidget {
         required String value,
         bool multiline = false,
       }) {
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -212,7 +206,7 @@ class WorkoutDetailScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: multiline ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
-          Icon(icon, size: 28, color: colorScheme.primary),
+          Icon(icon, size: 28),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -222,7 +216,6 @@ class WorkoutDetailScreen extends StatelessWidget {
                   label.toUpperCase(),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurfaceVariant,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -231,7 +224,6 @@ class WorkoutDetailScreen extends StatelessWidget {
                   value,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     height: 1.4,
-                    color: colorScheme.onSurface,
                   ),
                 ),
               ],

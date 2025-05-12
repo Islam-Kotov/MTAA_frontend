@@ -43,9 +43,8 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
     super.dispose();
   }
 
-  ButtonStyle _buttonStyle(Color background) {
+  ButtonStyle _buttonStyle() {
     return ElevatedButton.styleFrom(
-      backgroundColor: background,
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       minimumSize: const Size(double.infinity, 80),
@@ -55,14 +54,11 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('My plan'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -82,12 +78,11 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                         BoxShadow(
                           blurRadius: 6,
                           offset: const Offset(0, 3),
-                          color: colorScheme.primary.withOpacity(0.4),
+                          color: Theme.of(context).shadowColor,
                         ),
                       ],
-                      color: colorScheme.surface,
                     ),
-                    child: Icon(Icons.event_note, size: 64, color: colorScheme.primary),
+                    child: Icon(Icons.event_note, size: 64),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -102,7 +97,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                       child: FadeTransition(
                         opacity: _preparedFade,
                         child: ElevatedButton.icon(
-                          style: _buttonStyle(colorScheme.primary),
+                          style: _buttonStyle(),
                           icon: const Icon(Icons.fitness_center, size: 28),
                           label: Text(
                             'Choose a Prepared Workout Plan',
@@ -124,7 +119,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                       child: FadeTransition(
                         opacity: _customFade,
                         child: ElevatedButton.icon(
-                          style: _buttonStyle(colorScheme.primary),
+                          style: _buttonStyle(),
                           icon: const Icon(Icons.edit_note, size: 28),
                           label: Text(
                             'Create My Own Plan',
@@ -155,11 +150,10 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                           child: Container(
                             height: 160,
                             decoration: BoxDecoration(
-                              color: colorScheme.surfaceVariant,
                               borderRadius: BorderRadius.circular(20),
-                              boxShadow: const [
+                              boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black12,
+                                  color: Theme.of(context).shadowColor,
                                   blurRadius: 6,
                                   offset: Offset(0, 3),
                                 ),
@@ -168,7 +162,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.directions_run, size: 40, color: colorScheme.primary),
+                                Icon(Icons.directions_run, size: 40),
                                 const SizedBox(height: 10),
                                 Text(
                                   'Go for a run',

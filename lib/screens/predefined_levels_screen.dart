@@ -182,10 +182,9 @@ class WorkoutCard extends StatelessWidget {
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: Colors.blueGrey.shade100,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.fitness_center, size: 32, color: Colors.black54),
+              child: const Icon(Icons.fitness_center, size: 32),
             ),
           ),
           title: Text(
@@ -194,7 +193,7 @@ class WorkoutCard extends StatelessWidget {
           ),
           subtitle: Text(
             '${workout['duration']} | ${workout['calories']} | ${workout['exercise_count']} exercises',
-            style: const TextStyle(fontSize: 13, color: Colors.black54),
+            style: const TextStyle(fontSize: 13),
           ),
           onTap: onTap,
         ),

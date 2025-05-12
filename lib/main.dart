@@ -5,6 +5,7 @@ import 'screens/all_screens.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 
 final ThemeData lightTheme = ThemeData(
+  shadowColor: Colors.black.withOpacity(0.04),
   scaffoldBackgroundColor: const Color.fromRGBO(207, 228, 242, 1),
   appBarTheme: const AppBarTheme(
     backgroundColor: Color.fromRGBO(57, 132, 173, 1),
@@ -33,6 +34,7 @@ final ThemeData lightTheme = ThemeData(
 );
 
 final ThemeData darkTheme = ThemeData.dark().copyWith(
+  shadowColor: Colors.black.withOpacity(0.6),
   colorScheme: ThemeData.dark().colorScheme.copyWith(
     primaryContainer: Color.fromRGBO(24, 27, 29, 1),
     secondaryContainer: Color.fromRGBO(65, 65, 66, 1),

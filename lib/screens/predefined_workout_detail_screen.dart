@@ -168,11 +168,10 @@ class _PredefinedWorkoutDetailScreenState
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          // color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.purple,
+              color: Theme.of(context).shadowColor,
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -209,7 +208,6 @@ class _PredefinedWorkoutDetailScreenState
                     exercise['reps_sets'] ?? '-',
                     style: const TextStyle(
                       fontSize: 14,
-                      // color: Colors.black54,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -229,7 +227,6 @@ class _PredefinedWorkoutDetailScreenState
   Widget _fallbackIcon() => Container(
     width: 60,
     height: 60,
-    // color: Colors.grey.shade300,
     child: const Icon(Icons.image_not_supported),
   );
 }

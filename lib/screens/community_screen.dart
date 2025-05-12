@@ -71,11 +71,8 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
   }
 
   ButtonStyle _buttonStyle(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     return ElevatedButton.styleFrom(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
-      backgroundColor: colors.primary,
-      foregroundColor: colors.onPrimary,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       minimumSize: const Size(double.infinity, 80),
     );
@@ -124,11 +121,35 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
                     );
                   },
                 ),
+                SizedBox(
+                  height: 4
+                ),
                 Container(
+                  padding: EdgeInsets.symmetric(vertical: 30),
+                  decoration: BoxDecoration(
+                    border: Border.all()
+                  ),
                   child: StreamBuilder(
                     stream: channel.stream,
                     builder: (context, snapshot) {
-                      return Text(snapshot.hasData ? '${snapshot.data}' : '');
+                      if (snapshot.hasData) {
+                        try {
+                          final jsonData = jsonDecode(snapshot.data as String);
+
+                          final dynamic innerData = jsonData['data'];
+                          final decodedData = innerData is String ? jsonDecode(innerData) : innerData;
+
+                          final message = decodedData['message'] ?? 'No message available';
+
+                          return Text(message);
+                        } catch (e) {
+                          return Text('Error parsing message');
+                        }
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        return const Text('Waiting for data...');
+                      }
                     },
                   ),
                 )

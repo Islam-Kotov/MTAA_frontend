@@ -210,8 +210,8 @@ class _FriendsScreenState extends State<FriendsScreen> with TickerProviderStateM
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(blurRadius: 8, offset: Offset(0, 4), color: Colors.amber),
+          boxShadow: [
+            BoxShadow(blurRadius: 8, offset: Offset(0, 4), color: Theme.of(context).shadowColor),
           ],
         ),
         padding: const EdgeInsets.all(16),

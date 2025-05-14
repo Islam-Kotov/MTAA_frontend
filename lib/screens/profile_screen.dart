@@ -27,7 +27,7 @@ Future<Uint8List> showPrivate(String photo_url) async {
 }
 
 Future<Map<String, dynamic>?> getProfile() async {
-  final url = Uri.parse('http://147.175.163.45:8000/api/profile');
+  final url = Uri.parse('http://192.168.1.36:8000/api/profile');
 
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('api_token');
@@ -50,7 +50,7 @@ Future<Map<String, dynamic>?> getProfile() async {
 }
 
 Future<bool> logout() async {
-  final url = Uri.parse('http://147.175.163.45:8000/api/logout');
+  final url = Uri.parse('http://192.168.1.36:8000/api/logout');
 
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('api_token');
@@ -73,7 +73,7 @@ Future<bool> logout() async {
 }
 
 Future<bool> resetPassword(String email, String currentPassword, String newPassword) async {
-  final url = Uri.parse('http://147.175.163.45:8000/api/reset-password');
+  final url = Uri.parse('http://192.168.1.36:8000/api/reset-password');
 
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('api_token');
@@ -101,7 +101,7 @@ Future<bool> resetPassword(String email, String currentPassword, String newPassw
 }
 
 Future<bool> deleteAccount(String password) async {
-  final url = Uri.parse('http://147.175.163.45:8000/api/delete');
+  final url = Uri.parse('http://192.168.1.36:8000/api/delete');
 
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('api_token');
@@ -127,7 +127,7 @@ Future<bool> deleteAccount(String password) async {
 }
 
 Future<bool> saveProfile(String weight, String height, String birthdate) async {
-  final url = Uri.parse('http://147.175.163.45:8000/api/profile');
+  final url = Uri.parse('http://192.168.1.36:8000/api/profile');
 
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('api_token');
@@ -160,7 +160,7 @@ Future<bool> saveProfilePhoto(XFile image) async {
 
   final request = http.MultipartRequest(
     'POST',
-    Uri.parse('http://147.175.163.45:8000/api/profile-photo'),
+    Uri.parse('http://192.168.1.36:8000/api/profile-photo'),
   );
 
   request.headers['Authorization'] = 'Bearer $token';

@@ -14,3 +14,5 @@ export 'community_screen.dart';
 export 'friends_screen.dart';
 export 'theme_notifier.dart';
 export 'running_tracker_screen.dart';
+export 'weekly_plan_days_screen.dart';
+export 'weekly_plan_detail_screen.dart';

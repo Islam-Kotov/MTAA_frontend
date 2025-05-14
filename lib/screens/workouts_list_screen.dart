@@ -3,13 +3,17 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:developer';
-
 import 'workout_detail_screen.dart';
 
 class WorkoutsListScreen extends StatefulWidget {
   final String categoryName;
+  final String? selectedDay;
 
-  const WorkoutsListScreen({super.key, required this.categoryName});
+  const WorkoutsListScreen({
+    super.key,
+    required this.categoryName,
+    this.selectedDay,
+  });
 
   @override
   State<WorkoutsListScreen> createState() => _WorkoutsListScreenState();
@@ -18,7 +22,6 @@ class WorkoutsListScreen extends StatefulWidget {
 class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
   List workouts = [];
   List filteredWorkouts = [];
-  Set<int> alreadyAdded = {};
   String? apiToken;
   String? selectedFilter;
   bool isLoading = true;
@@ -42,41 +45,13 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('api_token');
     setState(() => apiToken = token);
-
-    await fetchUserPlanIds();
     await fetchWorkouts();
-  }
-
-  Future<void> fetchUserPlanIds() async {
-    if (apiToken == null) return;
-    final uri = Uri.parse('http://147.175.163.45:8000/api/plan');
-
-    try {
-      final response = await http.get(uri, headers: {
-        'Authorization': 'Bearer $apiToken',
-        'Content-Type': 'application/json',
-      });
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final ids = <int>{};
-        for (var item in data) {
-          if (item['workout_id'] != null) {
-            ids.add(item['workout_id']);
-          }
-        }
-        setState(() => alreadyAdded = ids);
-      } else {
-        log('Failed to fetch plan: ${response.statusCode}');
-      }
-    } catch (e) {
-      log('Error fetching user plan', error: e);
-    }
   }
 
   Future<void> fetchWorkouts() async {
     final uri = Uri.parse(
-        'http://147.175.163.45:8000/api/workouts?category=${Uri.encodeComponent(widget.categoryName)}');
+      'http://192.168.1.36:8000/api/workouts?category=${Uri.encodeComponent(widget.categoryName)}',
+    );
     try {
       final response = await http.get(uri, headers: {
         'Authorization': 'Bearer $apiToken',
@@ -121,13 +96,15 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
   }
 
   void showAddDialog(int workoutId) {
+    if (widget.selectedDay == null) return;
+
     final setsController = TextEditingController();
     final repsController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Add to My Plan'),
+        title: Text('Add to ${widget.selectedDay}'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -144,10 +121,7 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
               final sets = int.tryParse(setsController.text);
@@ -155,13 +129,13 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
 
               if (sets == null || reps == null || sets < 1 || sets > 100 || reps < 1 || reps > 100) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Please enter values between 1 and 100')),
+                  const SnackBar(content: Text('Enter valid values (1–100)')),
                 );
                 return;
               }
 
               Navigator.pop(context);
-              addExerciseToPlan(workoutId, sets, reps);
+              addToWeeklyPlan(workoutId, sets, reps);
             },
             child: const Text('Add'),
           ),
@@ -170,8 +144,10 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
     );
   }
 
-  Future<void> addExerciseToPlan(int workoutId, int sets, int reps) async {
-    final uri = Uri.parse('http://147.175.163.45:8000/api/plan/add');
+  Future<void> addToWeeklyPlan(int workoutId, int sets, int reps) async {
+    if (widget.selectedDay == null) return;
+
+    final uri = Uri.parse('http://192.168.1.36:8000/api/weekly-plan/add');
 
     try {
       final response = await http.post(
@@ -181,6 +157,7 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
+          'day_of_week': widget.selectedDay,
           'workout_id': workoutId,
           'sets': sets,
           'repetitions': reps,
@@ -188,27 +165,24 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
       );
 
       if (response.statusCode == 200) {
-        await fetchUserPlanIds(); // force update
-        setState(() {}); // redraw
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Exercise added to your plan')),
+          const SnackBar(content: Text('Exercise added to weekly plan')),
         );
       } else {
-        log('Failed to add: ${response.statusCode}', error: response.body);
+        log('Failed to add to weekly plan', error: response.body);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to add exercise')),
         );
       }
     } catch (e) {
-      log('Error adding exercise', error: e);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error adding exercise')),
-      );
+      log('Error sending request', error: e);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.categoryName),
@@ -228,39 +202,27 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (selectedFilter != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: Text(
-                'Filter: $selectedFilter',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              child: Text('Filter: $selectedFilter', style: theme.textTheme.bodyLarge),
             ),
           Expanded(
             child: isFiltering
                 ? const Center(child: CircularProgressIndicator())
-                : filteredWorkouts.isEmpty
-                ? const Center(child: Text('No workouts found for this filter.'))
                 : ListView.builder(
-              padding: const EdgeInsets.all(16),
               itemCount: filteredWorkouts.length,
+              padding: const EdgeInsets.all(16),
               itemBuilder: (context, index) {
                 final workout = filteredWorkouts[index];
                 final imageUrl = workout['exercise_photo'];
                 final heroTag = 'exercise-image-${workout['id']}';
-                final isAdded = alreadyAdded.contains(workout['id']);
 
                 return Card(
                   margin: const EdgeInsets.only(bottom: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
                   child: ListTile(
                     onTap: () {
                       Navigator.push(
@@ -284,11 +246,11 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
                           width: 60,
                           height: 60,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
+                          errorBuilder: (context, error, stackTrace) => Container(
                             width: 60,
                             height: 60,
                             color: Colors.grey.shade300,
-                            child: const Icon(Icons.image_not_supported),
+                            child: const Icon(Icons.broken_image),
                           ),
                         )
                             : Container(
@@ -299,23 +261,14 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
                         ),
                       ),
                     ),
-                    title: Text(
-                      workout['exercise_name'] ?? 'Unnamed',
-                      style: const TextStyle(
-                          fontSize: 17, fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: Text(
-                      workout['exercise_type'] ?? '',
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    trailing: IconButton(
-                      icon: Icon(
-                        isAdded ? Icons.check_circle : Icons.add_circle,
-                        size: 32,
-                        color: isAdded ? Colors.green : Colors.blue,
-                      ),
+                    title: Text(workout['exercise_name'] ?? 'Unnamed'),
+                    subtitle: Text(workout['exercise_type'] ?? ''),
+                    trailing: widget.selectedDay != null
+                        ? IconButton(
+                      icon: const Icon(Icons.add_circle, size: 32, color: Colors.blue),
                       onPressed: () => showAddDialog(workout['id']),
-                    ),
+                    )
+                        : null,
                   ),
                 );
               },

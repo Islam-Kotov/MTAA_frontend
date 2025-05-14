@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'predefined_levels_screen.dart';
 import 'my_own_plan_screen.dart';
 import 'running_tracker_screen.dart';
+import 'weekly_plan_days_screen.dart';
+
 
 class MyPlanScreen extends StatefulWidget {
   const MyPlanScreen({super.key});
@@ -128,7 +130,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (_) => const MyOwnPlanScreen()),
+                              MaterialPageRoute(builder: (_) => const WeeklyPlanDaysScreen()),
                             );
                           },
                         ),

@@ -10,7 +10,7 @@ Future<bool> saveProfileWithGender(String weight, String height, String birthdat
     print('Gender not picked');
     return false;
   }
-  final url = Uri.parse('http://147.175.163.45:8000/api/profile');
+  final url = Uri.parse('http://192.168.1.36:8000/api/profile');
 
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('api_token');

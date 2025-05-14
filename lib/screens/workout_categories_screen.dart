@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:developer';
+
 import 'workouts_list_screen.dart';
 
 class WorkoutCategoriesScreen extends StatefulWidget {
-  const WorkoutCategoriesScreen({super.key});
+  final String? selectedDay;
+
+  const WorkoutCategoriesScreen({super.key, this.selectedDay});
 
   @override
   State<WorkoutCategoriesScreen> createState() => _WorkoutCategoriesScreenState();
@@ -23,7 +26,7 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
   }
 
   Future<void> fetchCategories() async {
-    final uri = Uri.parse('http://147.175.163.45:8000/api/categories');
+    final uri = Uri.parse('http://192.168.1.36:8000/api/categories');
     log('Fetching categories from $uri');
 
     try {
@@ -53,6 +56,8 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Workout Categories'),
@@ -62,7 +67,7 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
           final isTablet = constraints.maxWidth >= 600;
 
           if (isLoading) {
-            return const Center(child: CircularProgressIndicator(color: Color(0xFF3984ad)));
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (hasError) {
@@ -70,10 +75,9 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.error_outline, size: 48),
+                  Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
                   const SizedBox(height: 16),
-                  Text('Could not load categories.',
-                      style: Theme.of(context).textTheme.bodyLarge),
+                  Text('Could not load categories.', style: theme.textTheme.bodyLarge),
                   const SizedBox(height: 8),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.refresh),
@@ -112,12 +116,15 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
                   ),
                   child: GestureDetector(
                     onTap: () {
-                      log('Opening category: ${category['name']}');
+                      log('Opening category: ${category['name']}'
+                          '${widget.selectedDay != null ? ' for ${widget.selectedDay}' : ''}');
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => WorkoutsListScreen(
                             categoryName: category['name'],
+                            selectedDay: widget.selectedDay, // nullable, handled later
                           ),
                         ),
                       );
@@ -133,18 +140,17 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
                           child: Row(
                             children: [
-                              Icon(Icons.fitness_center,
-                                  size: 36),
+                              const Icon(Icons.fitness_center, size: 36),
                               const SizedBox(width: 16),
                               Expanded(
                                 child: Text(
                                   category['name'],
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
-                              Icon(Icons.arrow_forward_ios),
+                              const Icon(Icons.arrow_forward_ios, size: 16),
                             ],
                           ),
                         ),

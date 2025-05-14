@@ -30,7 +30,7 @@ class _PredefinedLevelsScreenState extends State<PredefinedLevelsScreen> {
       workouts = [];
     });
 
-    final uri = Uri.parse('http://147.175.163.45:8000/api/predefined-workouts?level=$level');
+    final uri = Uri.parse('http://192.168.1.36:8000/api/predefined-workouts?level=$level');
     log('📡 Fetching $level workouts: $uri');
 
     try {

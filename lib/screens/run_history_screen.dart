@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'run_map_screen.dart';
 
 class RunHistoryScreen extends StatefulWidget {
   const RunHistoryScreen({super.key});
@@ -66,23 +67,53 @@ class _RunHistoryScreenState extends State<RunHistoryScreen> {
         itemBuilder: (context, index) {
           final run = _runs[index];
           final startedAt = DateTime.parse(run['started_at']);
-          final formattedDate = DateFormat.yMMMd().add_Hm().format(startedAt);
-          return Card(
-            elevation: 4,
-            margin: const EdgeInsets.only(bottom: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(formattedDate, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 8),
-                  Text("📏 Distance: ${(run['distance'] / 1000).toStringAsFixed(2)} km"),
-                  Text("🕒 Duration: ${_formatDuration(run['duration'])}"),
-                  Text("🚀 Avg Speed: ${run['avg_speed'].toStringAsFixed(2)} km/h"),
-                  Text("👟 Steps: ${run['steps']}"),
-                ],
+          final formattedDate =
+          DateFormat.yMMMd().add_Hm().format(startedAt);
+
+          return InkWell(
+            onTap: () {
+              if (run['route'] != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => RunMapScreen(routeJson: jsonEncode(run['route'])),
+                  ),
+                );
+              }
+            },
+            child: Card(
+              elevation: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      formattedDate,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text("Distance: ${(run['distance'] / 1000).toStringAsFixed(2)} km"),
+                    Text("Duration: ${_formatDuration(run['duration'])}"),
+                    Text("Avg Speed: ${run['avg_speed'].toStringAsFixed(2)} km/h"),
+                    Text("Steps: ${run['steps']}"),
+                    if (run['route'] != null)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 8),
+                        child: Text(
+                          "Tap to view route on map",
+                          style: TextStyle(fontSize: 14, color: Colors.blue),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           );

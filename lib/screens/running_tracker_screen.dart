@@ -54,12 +54,14 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
       final request = await _location.requestPermission();
       if (request != PermissionStatus.granted) return;
     }
+
     final currentLocation = await _location.getLocation();
     if (!mounted) return;
     setState(() {
       _currentLatLng = LatLng(currentLocation.latitude!, currentLocation.longitude!);
       _isMapReady = true;
     });
+
     _startStepCounting();
     _startAccelerometer();
   }
@@ -90,7 +92,13 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
     });
   }
 
-  void _startLocationTracking() {
+  void _startLocationTracking() async {
+    await _location.changeSettings(
+      accuracy: LocationAccuracy.high,
+      interval: 1000,
+      distanceFilter: 1,
+    );
+
     _locationSubscription = _location.onLocationChanged.listen((newLocation) {
       final newLatLng = LatLng(newLocation.latitude!, newLocation.longitude!);
       if (_isRunning && _lastLocation != null) {
@@ -153,10 +161,17 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('api_token');
     if (token == null) return;
+
     final seconds = _stopwatch.elapsed.inSeconds;
     if (seconds == 0 || _distance == 0.0) return;
+
     final avgSpeed = (_distance / 1000) / (seconds / 3600);
     final startTime = DateTime.now().subtract(_stopwatch.elapsed).toIso8601String();
+
+    final routeJson = _routeCoords
+        .map((coord) => {'lat': coord.latitude, 'lng': coord.longitude})
+        .toList();
+
     final response = await http.post(
       Uri.parse('http://192.168.1.36:8000/api/runs'),
       headers: {
@@ -170,13 +185,17 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
         "duration": seconds,
         "avg_speed": avgSpeed,
         "started_at": startTime,
+        "route": routeJson,
       }),
     );
+
     if (response.statusCode == 201) {
       _resetRun();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Run saved successfully!')),
       );
+    } else {
+      debugPrint("Failed to save run: ${response.body}");
     }
   }
 
@@ -209,8 +228,10 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
     final dLat = _degToRad(current.latitude! - last.latitude!);
     final dLon = _degToRad(current.longitude! - last.longitude!);
     final a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_degToRad(last.latitude!)) * cos(_degToRad(current.latitude!)) *
-            sin(dLon / 2) * sin(dLon / 2);
+        cos(_degToRad(last.latitude!)) *
+            cos(_degToRad(current.latitude!)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
     final c = 2 * atan2(sqrt(a), sqrt(1 - a));
     return R * c;
   }
@@ -242,14 +263,16 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
               color: Colors.orange.shade200,
               child: const Text(
                 "🏃‍♂️ Keep going! Maintain your pace!",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
             ),
           SizedBox(
             height: 300,
             child: GoogleMap(
-              initialCameraPosition: CameraPosition(target: _currentLatLng, zoom: 16),
+              initialCameraPosition:
+              CameraPosition(target: _currentLatLng, zoom: 16),
               onMapCreated: (controller) => _mapController = controller,
               myLocationEnabled: true,
               myLocationButtonEnabled: true,
@@ -259,7 +282,8 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               elevation: 4,
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -267,7 +291,8 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _infoTile("Time", _elapsedTime),
-                    _infoTile("Distance", "${(_distance / 1000).toStringAsFixed(2)} km"),
+                    _infoTile("Distance",
+                        "${(_distance / 1000).toStringAsFixed(2)} km"),
                     _infoTile("Avg Speed", _averageSpeedText()),
                     _infoTile("Steps", "$_steps"),
                     _infoTile("Accel", _accelerationText),
@@ -276,8 +301,10 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         ElevatedButton(
-                          onPressed: _isRunning ? _stopRun : _startRun,
-                          child: Text(_isRunning ? 'Stop' : 'Start'),
+                          onPressed:
+                          _isRunning ? _stopRun : _startRun,
+                          child:
+                          Text(_isRunning ? 'Stop' : 'Start'),
                         ),
                         ElevatedButton(
                           onPressed: _resetRun,
@@ -293,7 +320,9 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const RunHistoryScreen()),
+                            MaterialPageRoute(
+                                builder: (_) =>
+                                const RunHistoryScreen()),
                           );
                         },
                       ),
@@ -315,7 +344,9 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(fontSize: 16)),
-          Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(value,
+              style:
+              const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         ],
       ),
     );

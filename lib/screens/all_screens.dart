@@ -16,3 +16,4 @@ export 'theme_notifier.dart';
 export 'running_tracker_screen.dart';
 export 'weekly_plan_days_screen.dart';
 export 'weekly_plan_detail_screen.dart';
+export 'run_history_screen.dart';

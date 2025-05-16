@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:pedometer/pedometer.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:sensors_plus/sensors_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'run_history_screen.dart';
 
 class RunningTrackerScreen extends StatefulWidget {
   const RunningTrackerScreen({super.key});
@@ -45,52 +49,34 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
 
   Future<void> _initialize() async {
     final permissionStatus = await _location.hasPermission();
-    debugPrint("Permission status: $permissionStatus");
-
     if (permissionStatus == PermissionStatus.denied) {
       final request = await _location.requestPermission();
-      debugPrint("Permission requested: $request");
       if (request != PermissionStatus.granted) return;
     }
-
     final currentLocation = await _location.getLocation();
-    debugPrint("Current location: ${currentLocation.latitude}, ${currentLocation.longitude}");
-
     if (!mounted) return;
     setState(() {
       _currentLatLng = LatLng(currentLocation.latitude!, currentLocation.longitude!);
       _isMapReady = true;
     });
-
     _startStepCounting();
     _startAccelerometer();
   }
 
   void _startStepCounting() {
     _stepSubscription = Pedometer.stepCountStream.listen((event) {
-      debugPrint("👣 Step event: ${event.steps}");
       if (!mounted) return;
       setState(() => _steps = event.steps);
-    }, onError: (e) => debugPrint("Step counter error: $e"));
+    });
   }
 
   void _startAccelerometer() {
     _accelerometerSubscription = accelerometerEvents.listen((event) {
-      final ax = event.x.toStringAsFixed(2);
-      final ay = event.y.toStringAsFixed(2);
-      final az = event.z.toStringAsFixed(2);
-
-      if (!mounted) return;
-      setState(() => _accelerationText = "X: $ax, Y: $ay, Z: $az");
-
       final magnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
-      if (!_isRunning && magnitude > 14.0) {
-        debugPrint("Motion detected via accelerometer, starting run");
-        _startRun();
-      }
-
+      if (!mounted) return;
+      setState(() => _accelerationText = "X: ${event.x.toStringAsFixed(2)}, Y: ${event.y.toStringAsFixed(2)}, Z: ${event.z.toStringAsFixed(2)}");
+      if (!_isRunning && magnitude > 14.0) _startRun();
       if (_isRunning && magnitude > 14.5) {
-        if (!mounted) return;
         setState(() => _showMotivation = true);
         _motivationTimer?.cancel();
         _motivationTimer = Timer(const Duration(seconds: 10), () {
@@ -102,16 +88,9 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
 
   void _startLocationTracking() {
     _locationSubscription = _location.onLocationChanged.listen((newLocation) {
-      debugPrint("New location: ${newLocation.latitude}, ${newLocation.longitude}");
       final newLatLng = LatLng(newLocation.latitude!, newLocation.longitude!);
-
       if (_isRunning && _lastLocation != null) {
-        final d = _calculateDistance(
-          _lastLocation!.latitude!,
-          _lastLocation!.longitude!,
-          newLocation.latitude!,
-          newLocation.longitude!,
-        );
+        final d = _calculateDistance(_lastLocation!, newLocation);
         if (!mounted) return;
         setState(() {
           _distance += d;
@@ -130,12 +109,11 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
       _lastLocation = newLocation;
       if (!mounted) return;
       setState(() => _currentLatLng = newLatLng);
-    }, onError: (e) => debugPrint("Location tracking error: $e"));
+    });
   }
 
   void _startRun() {
     if (_isRunning) return;
-    debugPrint("▶️ Starting run");
     _isRunning = true;
     _stopwatch.start();
     _startTimer();
@@ -143,15 +121,14 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
   }
 
   void _stopRun() {
-    debugPrint("⏹ Stopping run");
     _isRunning = false;
     _stopwatch.stop();
     _locationSubscription?.cancel();
     _motivationTimer?.cancel();
+    _submitRun();
   }
 
   void _resetRun() {
-    debugPrint("🔁 Resetting run");
     _isRunning = false;
     _stopwatch.reset();
     _locationSubscription?.cancel();
@@ -165,6 +142,37 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
       _polylines.clear();
       _showMotivation = false;
     });
+  }
+
+  Future<void> _submitRun() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('api_token');
+    if (token == null) return;
+    final seconds = _stopwatch.elapsed.inSeconds;
+    if (seconds == 0 || _distance == 0.0) return;
+    final avgSpeed = (_distance / 1000) / (seconds / 3600);
+    final startTime = DateTime.now().subtract(_stopwatch.elapsed).toIso8601String();
+    final response = await http.post(
+      Uri.parse('http://192.168.1.36:8000/api/runs'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: json.encode({
+        "distance": _distance,
+        "steps": _steps,
+        "duration": seconds,
+        "avg_speed": avgSpeed,
+        "started_at": startTime,
+      }),
+    );
+    if (response.statusCode == 201) {
+      _resetRun();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Run saved successfully!')),
+      );
+    }
   }
 
   void _startTimer() {
@@ -182,12 +190,22 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
     return "$minutes:$seconds";
   }
 
-  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+  String _averageSpeedText() {
+    final seconds = _stopwatch.elapsed.inSeconds;
+    if (seconds == 0 || _distance == 0.0) return "0.00 km/h";
+    final hours = seconds / 3600;
+    final km = _distance / 1000;
+    final speed = km / hours;
+    return "${speed.toStringAsFixed(2)} km/h";
+  }
+
+  double _calculateDistance(LocationData last, LocationData current) {
     const R = 6371000;
-    final dLat = _degToRad(lat2 - lat1);
-    final dLon = _degToRad(lon2 - lon1);
+    final dLat = _degToRad(current.latitude! - last.latitude!);
+    final dLon = _degToRad(current.longitude! - last.longitude!);
     final a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_degToRad(lat1)) * cos(_degToRad(lat2)) * sin(dLon / 2) * sin(dLon / 2);
+        cos(_degToRad(last.latitude!)) * cos(_degToRad(current.latitude!)) *
+            sin(dLon / 2) * sin(dLon / 2);
     final c = 2 * atan2(sqrt(a), sqrt(1 - a));
     return R * c;
   }
@@ -207,65 +225,81 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Running Tracker'),
-      ),
+      appBar: AppBar(title: const Text('Running Tracker')),
       body: !_isMapReady
           ? const Center(child: CircularProgressIndicator())
           : Column(
-              children: [
-                if (_showMotivation)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    color: Colors.orange.shade200,
-                    child: const Text(
-                      "🏃‍♂️ Keep going! Maintain your pace!",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                SizedBox(
-                  height: 300,
-                  child: GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: _currentLatLng,
-                      zoom: 16,
-                    ),
-                    onMapCreated: (controller) => _mapController = controller,
-                    myLocationEnabled: true,
-                    myLocationButtonEnabled: true,
-                    polylines: _polylines,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _infoTile("⏱ Time", _elapsedTime),
-                      _infoTile("📏 Distance", "${(_distance / 1000).toStringAsFixed(2)} km"),
-                      _infoTile("👟 Steps", "$_steps"),
-                      _infoTile("🎯 Accel", _accelerationText),
-                      const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          ElevatedButton(
-                            onPressed: _isRunning ? _stopRun : _startRun,
-                            child: Text(_isRunning ? 'Stop' : 'Start'),
-                          ),
-                          ElevatedButton(
-                            onPressed: _resetRun,
-                            child: const Text('Reset'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+        children: [
+          if (_showMotivation)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              color: Colors.orange.shade200,
+              child: const Text(
+                "🏃‍♂️ Keep going! Maintain your pace!",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
             ),
+          SizedBox(
+            height: 300,
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(target: _currentLatLng, zoom: 16),
+              onMapCreated: (controller) => _mapController = controller,
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
+              polylines: _polylines,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _infoTile("Time", _elapsedTime),
+                    _infoTile("Distance", "${(_distance / 1000).toStringAsFixed(2)} km"),
+                    _infoTile("Avg Speed", _averageSpeedText()),
+                    _infoTile("Steps", "$_steps"),
+                    _infoTile("Accel", _accelerationText),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed: _isRunning ? _stopRun : _startRun,
+                          child: Text(_isRunning ? 'Stop' : 'Start'),
+                        ),
+                        ElevatedButton(
+                          onPressed: _resetRun,
+                          child: const Text('Reset'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Center(
+                      child: TextButton.icon(
+                        icon: const Icon(Icons.history),
+                        label: const Text('View Run History'),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const RunHistoryScreen()),
+                          );
+                        },
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -275,8 +309,8 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
-          Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(label, style: const TextStyle(fontSize: 16)),
+          Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         ],
       ),
     );

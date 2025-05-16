@@ -1,0 +1,93 @@
+import 'dart:async';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
+
+class RunHistoryScreen extends StatefulWidget {
+  const RunHistoryScreen({super.key});
+
+  @override
+  State<RunHistoryScreen> createState() => _RunHistoryScreenState();
+}
+
+class _RunHistoryScreenState extends State<RunHistoryScreen> {
+  List<dynamic> _runs = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRuns();
+  }
+
+  Future<void> _fetchRuns() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('api_token');
+    if (token == null) return;
+
+    final response = await http.get(
+      Uri.parse('http://192.168.1.36:8000/api/runs'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        _runs = json.decode(response.body);
+        _loading = false;
+      });
+    } else {
+      setState(() => _loading = false);
+      debugPrint("Failed to load runs: ${response.body}");
+    }
+  }
+
+  String _formatDuration(int seconds) {
+    final min = seconds ~/ 60;
+    final sec = seconds % 60;
+    return '${min}m ${sec}s';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Run History')),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _runs.isEmpty
+          ? const Center(child: Text('No runs found.'))
+          : ListView.builder(
+        itemCount: _runs.length,
+        padding: const EdgeInsets.all(16),
+        itemBuilder: (context, index) {
+          final run = _runs[index];
+          final startedAt = DateTime.parse(run['started_at']);
+          final formattedDate = DateFormat.yMMMd().add_Hm().format(startedAt);
+          return Card(
+            elevation: 4,
+            margin: const EdgeInsets.only(bottom: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(formattedDate, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  const SizedBox(height: 8),
+                  Text("📏 Distance: ${(run['distance'] / 1000).toStringAsFixed(2)} km"),
+                  Text("🕒 Duration: ${_formatDuration(run['duration'])}"),
+                  Text("🚀 Avg Speed: ${run['avg_speed'].toStringAsFixed(2)} km/h"),
+                  Text("👟 Steps: ${run['steps']}"),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

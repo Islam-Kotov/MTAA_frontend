@@ -4,6 +4,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'friends_screen.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:convert';
+import 'dart:async';
+
+void pingSocketConnection() {
+  Timer.periodic(Duration(seconds: 10), (Timer timer) {
+    getCurrentChallenge();
+  });
+}
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -12,8 +19,8 @@ class CommunityScreen extends StatefulWidget {
   State<CommunityScreen> createState() => _CommunityScreenState();
 }
 
-Future<void> sayHello() async {
-  final url = Uri.parse('http://192.168.1.36:8000/api/sayHello');
+Future<void> getCurrentChallenge() async {
+  final url = Uri.parse('http://192.168.1.36:8000/api/getCurrentChallenge');
 
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('api_token');
@@ -36,6 +43,7 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
   @override
   void initState() {
     super.initState();
+    pingSocketConnection();
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 700),
@@ -57,10 +65,11 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
       {
         'event': 'pusher:subscribe',
         'data': {
-          'channel': 'test'
+          'channel': 'challenges'
         }
       }
     ));
+    getCurrentChallenge();
   }
 
   @override
@@ -81,6 +90,7 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
   @override
   Widget build(BuildContext context) {
     final textStyle = Theme.of(context).textTheme;
+    final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Community')),
@@ -110,49 +120,57 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
                   ),
                 ),
                 const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  style: _buttonStyle(context),
-                  icon: const Icon(Icons.waving_hand_outlined),
-                  label: Text('Say Hello', style: textStyle.titleMedium),
-                  onPressed: () async {
-                    await sayHello();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Hello sent to server')),
-                    );
-                  },
+                FadeTransition(
+                  opacity: _friendsFade,
+                  child: ElevatedButton.icon(
+                    style: _buttonStyle(context),
+                    icon: const Icon(Icons.star_border, size: 28),
+                    label: Text(
+                      'Daily challenge',
+                      style: textStyle.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () async {
+                      await getCurrentChallenge();
+                    },
+                  ),
                 ),
                 SizedBox(
-                  height: 4
+                  height: 24
                 ),
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 30),
                   decoration: BoxDecoration(
-                    border: Border.all()
+                    color: colors.onPrimary,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white10),
                   ),
-                  child: StreamBuilder(
-                    stream: channel.stream,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        try {
-                          final jsonData = jsonDecode(snapshot.data as String);
+                  child: Center(
+                    child: StreamBuilder(
+                      stream: channel.stream,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          try {
+                            final jsonData = jsonDecode(snapshot.data as String);
 
-                          final dynamic innerData = jsonData['data'];
-                          final decodedData = innerData is String ? jsonDecode(innerData) : innerData;
+                            final dynamic innerData = jsonData['data'];
+                            final decodedData = innerData is String ? jsonDecode(innerData) : innerData;
 
-                          final message = decodedData['message'] ?? 'No message available';
+                            final challenge = decodedData['challenge'];
+                            final message = challenge != null ? challenge['description'] : 'No message available';
 
-                          return Text(message);
-                        } catch (e) {
-                          return Text('Error parsing message');
+                            return Text(message);
+                          } catch (e) {
+                            return Text('Error parsing message');
+                          }
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else {
+                          return const Text('Waiting for data...');
                         }
-                      } else if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
-                      } else {
-                        return const Text('Waiting for data...');
-                      }
-                    },
-                  ),
-                )
+                      },
+                    ),
+                  )
+                ),
               ],
             ),
           ),

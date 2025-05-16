@@ -19,6 +19,7 @@ class RunningTrackerScreen extends StatefulWidget {
 
 class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
   int _steps = 0;
+  int? _initialStepCount;
   double _distance = 0.0;
   String _elapsedTime = "00:00";
   String _accelerationText = "X: 0.0, Y: 0.0, Z: 0.0";
@@ -66,7 +67,10 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
   void _startStepCounting() {
     _stepSubscription = Pedometer.stepCountStream.listen((event) {
       if (!mounted) return;
-      setState(() => _steps = event.steps);
+      if (_initialStepCount == null) {
+        _initialStepCount = event.steps;
+      }
+      setState(() => _steps = event.steps - _initialStepCount!);
     });
   }
 
@@ -133,6 +137,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
     _stopwatch.reset();
     _locationSubscription?.cancel();
     _motivationTimer?.cancel();
+    _initialStepCount = null;
     if (!mounted) return;
     setState(() {
       _steps = 0;
@@ -192,7 +197,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
 
   String _averageSpeedText() {
     final seconds = _stopwatch.elapsed.inSeconds;
-    if (seconds == 0 || _distance == 0.0) return "0.00 km/h";
+    if (seconds < 5 || _distance < 5.0) return "0.00 km/h";
     final hours = seconds / 3600;
     final km = _distance / 1000;
     final speed = km / hours;

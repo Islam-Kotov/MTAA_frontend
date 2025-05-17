@@ -8,6 +8,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 import 'all_screens.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'dart:io' show Platform;
 
 Future<Uint8List> showPrivate(String photo_url) async {
   final url = Uri.parse(photo_url);
@@ -174,6 +177,53 @@ Future<bool> saveProfilePhoto(XFile image) async {
     return true;
   } else {
     print('${responseBody.body}');
+    return false;
+  }
+}
+
+Future<bool> saveDeviceToken(String? deviceToken) async {
+  final url = Uri.parse('http://192.168.1.36:8000/api/devices/save');
+
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('api_token');
+
+  final response = await http.post(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+      'Accept': 'application/json'
+    },
+    body: jsonEncode({
+      'token': deviceToken,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    print('${response.body}');
+    return true;
+  } else {
+    print('${response.body}');
+    return false;
+  }
+}
+
+Future<bool> deleteDeviceToken(String? deviceToken) async {
+  final uri = Uri.parse('http://192.168.1.36:8000/api/devices/delete/$deviceToken');
+
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('api_token');
+
+  final response = await http.delete(uri, headers: {
+    'Authorization': 'Bearer $token',
+    'Accept': 'application/json',
+  });
+
+  if (response.statusCode == 200) {
+    print('${response.body}');
+    return true;
+  } else {
+    print('${response.body}');
     return false;
   }
 }
@@ -719,17 +769,53 @@ class NotificationsSwitch extends StatefulWidget {
 
 class _NotificationsSwitchState extends State<NotificationsSwitch> {
   bool notificationsOn = false;
+  Future<void> _enableNotifications() async {
+    if (Platform.isAndroid) {
+      await Firebase.initializeApp();
+      await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        announcement: true,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        sound: true,
+      );
+      String? token = await FirebaseMessaging.instance.getToken();
+      print('FCM Token: $token');
+
+      await saveDeviceToken(token);
+    }
+  }
+
+  Future<void> _disableNotifications() async {
+    if (Platform.isAndroid) {
+      String? token = await FirebaseMessaging.instance.getToken();
+      if (token != null) {
+        print('Deleting FCM Token: $token');
+
+        await deleteDeviceToken(token);
+
+        await FirebaseMessaging.instance.deleteToken();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Switch(
       // This bool value toggles the switch.
       value: notificationsOn,
-      onChanged: (bool value) {
+      onChanged: (bool value) async {
         // This is called when the user toggles the switch.
         setState(() {
           notificationsOn = value;
         });
+
+        if (value) {
+          await _enableNotifications();
+        } else {
+          await _disableNotifications();
+        }
       },
     );
   }

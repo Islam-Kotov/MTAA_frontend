@@ -58,22 +58,22 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
 // }
 
 void main() async {
-  if (Platform.isAndroid) {
-    WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp();
-    // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  // if (Platform.isAndroid) {
+  //   WidgetsFlutterBinding.ensureInitialized();
+  //   await Firebase.initializeApp();
+  //   // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    await FirebaseMessaging.instance.requestPermission(
-      alert: true,
-      announcement: true,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      sound: true,
-    );
-    String? token = await FirebaseMessaging.instance.getToken();
-    print('FCM Token: $token');
-  }
+  //   await FirebaseMessaging.instance.requestPermission(
+  //     alert: true,
+  //     announcement: true,
+  //     badge: true,
+  //     carPlay: false,
+  //     criticalAlert: false,
+  //     sound: true,
+  //   );
+  //   String? token = await FirebaseMessaging.instance.getToken();
+  //   print('FCM Token: $token');
+  // }
   
 
   runApp(

@@ -67,6 +67,8 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
         final day = item['day'];
         result[day] = {
           'title': item['title'],
+          'description': item['description'],
+          'scheduled_time': item['scheduled_time'],
           'hasExercises': (item['workouts'] as List).isNotEmpty
         };
       }
@@ -102,6 +104,8 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
     final info = dayData[day];
     final title = info?['title'] as String?;
     final hasExercises = info?['hasExercises'] == true;
+    final description = info?['description'] ?? '';
+    final scheduledTime = info?['scheduled_time'];
 
     final displayText = title != null && title.trim().isNotEmpty
         ? '$day — $title'
@@ -115,7 +119,7 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
           parent: _controller,
           curve: Interval(
             0.1 * index,
-            0.1 * index + 0.5 <= 1.0 ? 0.1 * index + 0.5 : 1.0,
+            (0.1 * index + 0.5).clamp(0.0, 1.0),
             curve: Curves.easeOut,
           ),
         ),
@@ -129,19 +133,45 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
           shadowColor: theme.shadowColor.withOpacity(0.15),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 26),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Text(
-                    displayText,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: color,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        displayText,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: color,
+                        ),
+                      ),
                     ),
+                    const Icon(Icons.chevron_right, size: 26),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        description.isNotEmpty
+                            ? description
+                            : 'No description set',
+                        style: TextStyle(fontSize: 14, color: color),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        scheduledTime != null
+                            ? 'Scheduled at: $scheduledTime'
+                            : 'No time set',
+                        style: TextStyle(fontSize: 14, color: color),
+                      ),
+                    ],
                   ),
                 ),
-                const Icon(Icons.chevron_right, size: 26),
               ],
             ),
           ),

@@ -973,9 +973,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
                           if (pickedFile != null) {
                             final success = await saveProfilePhoto(pickedFile);
 
-                            print('Uploading file: ${pickedFile.path}');
+                            // print('Uploading file: ${pickedFile.path}');
                             // print('File exists: ${await pickedFile.exists()}');
-                            print('Length: ${await pickedFile.length()} bytes');
+                            // print('Length: ${await pickedFile.length()} bytes');
 
                             if (success) {
                               ScaffoldMessenger.of(context).showSnackBar(

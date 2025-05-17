@@ -80,7 +80,7 @@ class _WeeklyPlanDetailScreenState extends State<WeeklyPlanDetailScreen> {
       return;
     }
 
-    final uri = Uri.parse('http://192.168.1.36:8000/api/weekly-plan/update-title');
+    final uri = Uri.parse('http://192.168.1.36:8000/api/weekly-plan/update-meta');
     final response = await http.patch(uri,
         headers: {
           'Authorization': 'Bearer $apiToken',

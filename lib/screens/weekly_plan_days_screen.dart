@@ -76,7 +76,7 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
       setState(() {
         dayData = result;
         isLoading = false;
-        _controller.forward();
+        _controller.forward(from: 0);
       });
     } else {
       log('Failed to load weekly plan: ${response.statusCode}');
@@ -90,7 +90,10 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
       MaterialPageRoute(
         builder: (_) => WeeklyPlanDetailScreen(dayOfWeek: day),
       ),
-    ).then((_) => fetchWeeklyPlanData());
+    ).then((_) async {
+      setState(() => isLoading = true);
+      await fetchWeeklyPlanData();
+    });
   }
 
   @override
@@ -99,7 +102,7 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
     super.dispose();
   }
 
-  Widget buildAnimatedDayTile(String day, int index) {
+  Widget buildAnimatedDayTile(String day, int index, double width) {
     final theme = Theme.of(context);
     final info = dayData[day];
     final title = info?['title'] as String?;
@@ -126,53 +129,54 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
       ),
       child: GestureDetector(
         onTap: () => navigateToDayDetail(day),
-        child: Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          elevation: 5,
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          shadowColor: theme.shadowColor.withOpacity(0.15),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 26),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        displayText,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: color,
+        child: SizedBox(
+          width: width,
+          child: Card(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            elevation: 5,
+            margin: const EdgeInsets.all(8),
+            shadowColor: theme.shadowColor.withOpacity(0.15),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 26),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          displayText,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: color,
+                          ),
                         ),
                       ),
-                    ),
-                    const Icon(Icons.chevron_right, size: 26),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        description.isNotEmpty
-                            ? description
-                            : 'No description set',
-                        style: TextStyle(fontSize: 14, color: color),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        scheduledTime != null
-                            ? 'Scheduled at: $scheduledTime'
-                            : 'No time set',
-                        style: TextStyle(fontSize: 14, color: color),
-                      ),
+                      const Icon(Icons.chevron_right, size: 26),
                     ],
                   ),
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          description.isNotEmpty ? description : 'No description set',
+                          style: TextStyle(fontSize: 14, color: color),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          scheduledTime != null
+                              ? 'Scheduled at: $scheduledTime'
+                              : 'No time set',
+                          style: TextStyle(fontSize: 14, color: color),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -182,18 +186,28 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = MediaQuery.of(context).size.width > 600;
+    final crossAxisCount = isTablet ? 2 : 1;
+    final itemWidth = MediaQuery.of(context).size.width / crossAxisCount;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Weekly Plan'),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
+          : GridView.builder(
         padding: const EdgeInsets.all(16),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: isTablet ? 2.5 : 2.1,
+        ),
         itemCount: weekDays.length,
         itemBuilder: (context, index) {
           final day = weekDays[index];
-          return buildAnimatedDayTile(day, index);
+          return buildAnimatedDayTile(day, index, itemWidth);
         },
       ),
     );

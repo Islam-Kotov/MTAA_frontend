@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -131,6 +130,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
 
   void _startRun() {
     if (_isRunning) return;
+    _resetRun();
     _isRunning = true;
     _stopwatch.start();
     _startTimer();
@@ -168,13 +168,13 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
   }
 
   void _resetRun() {
-    _isRunning = false;
     _stopwatch.reset();
     _locationSubscription?.cancel();
     _motivationTimer?.cancel();
     _initialStepCount = null;
     if (!mounted) return;
     setState(() {
+      _isRunning = false;
       _steps = 0;
       _distance = 0.0;
       _elapsedTime = "00:00";
@@ -288,7 +288,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
               padding: const EdgeInsets.all(12),
               color: Colors.orange.shade200,
               child: const Text(
-                "🏃‍♂️ Keep going! Maintain your pace!",
+                "Keep going! Maintain your pace!",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),

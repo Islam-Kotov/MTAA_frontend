@@ -139,7 +139,7 @@ class _FillProfileInfoScreen extends State<FillProfileInfoScreen> {
                 final success = await saveProfileWithGender(weight, height, birthdate, gender);
 
                 if (!mounted) return; // Prevent using context if widget is disposed
-                
+
                 if (success) {
                   Navigator.pushReplacement(
                     context,

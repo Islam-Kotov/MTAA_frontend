@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'screens/all_screens.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'dart:io' show Platform;
 
 final ThemeData lightTheme = ThemeData(
   shadowColor: Colors.black.withOpacity(0.04),
@@ -52,25 +53,28 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
   )
 );
 
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print('Handling a background message: ${message.messageId}');
-}
+// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+//   print('Handling a background message: ${message.messageId}');
+// }
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  if (Platform.isAndroid) {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp();
+    // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  await FirebaseMessaging.instance.requestPermission(
-    alert: true,
-    announcement: true,
-    badge: true,
-    carPlay: false,
-    criticalAlert: false,
-    sound: true,
-  );
-  String? token = await FirebaseMessaging.instance.getToken();
-  print('FCM Token: $token');
+    await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      announcement: true,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      sound: true,
+    );
+    String? token = await FirebaseMessaging.instance.getToken();
+    print('FCM Token: $token');
+  }
+  
 
   runApp(
     ChangeNotifierProvider(

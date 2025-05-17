@@ -14,10 +14,12 @@ class PredefinedWorkoutDetailScreen extends StatefulWidget {
   });
 
   @override
-  State<PredefinedWorkoutDetailScreen> createState() => _PredefinedWorkoutDetailScreenState();
+  State<PredefinedWorkoutDetailScreen> createState() =>
+      _PredefinedWorkoutDetailScreenState();
 }
 
-class _PredefinedWorkoutDetailScreenState extends State<PredefinedWorkoutDetailScreen> {
+class _PredefinedWorkoutDetailScreenState
+    extends State<PredefinedWorkoutDetailScreen> {
   Map? workout;
   bool isLoading = false;
 
@@ -29,7 +31,8 @@ class _PredefinedWorkoutDetailScreenState extends State<PredefinedWorkoutDetailS
 
   Future<void> fetchWorkoutDetail() async {
     setState(() => isLoading = true);
-    final uri = Uri.parse('http://192.168.1.36:8000/api/predefined-workouts/${widget.workoutId}');
+    final uri = Uri.parse(
+        'http://192.168.1.36:8000/api/predefined-workouts/${widget.workoutId}');
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
@@ -58,15 +61,15 @@ class _PredefinedWorkoutDetailScreenState extends State<PredefinedWorkoutDetailS
           child: Image.network(content, fit: BoxFit.contain),
         )
             : Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: SingleChildScrollView(
             child: Text(
               content,
-              style: const TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 22),
             ),
           ),
         ),
@@ -83,52 +86,44 @@ class _PredefinedWorkoutDetailScreenState extends State<PredefinedWorkoutDetailS
           : workout == null
           ? const Center(child: Text('Workout not found'))
           : SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GestureDetector(
-              onTap: () => _showFullscreen(widget.imageUrl, isImage: true),
-              child: Hero(
-                tag: 'predefined-workout-image-${widget.workoutId}',
-                child: Container(
-                  height: 200,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    image: DecorationImage(
-                      image: NetworkImage(widget.imageUrl),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
             Text(
               workout!['title'],
-              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                  fontSize: 30, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               workout!['focus'] ?? '',
-              style: const TextStyle(fontSize: 20),
+              style: const TextStyle(fontSize: 22),
             ),
-            const SizedBox(height: 20),
-            _infoBlock(),
             const SizedBox(height: 24),
-            const Text('💪 Benefits:', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
+            _infoBlock(),
+            const SizedBox(height: 28),
+            const Text(
+              'Benefits:',
+              style: TextStyle(
+                  fontSize: 26, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
             GestureDetector(
-              onTap: () => _showFullscreen(workout!['benefits'] ?? ''),
+              onTap: () =>
+                  _showFullscreen(workout!['benefits'] ?? ''),
               child: Text(
                 workout!['benefits'] ?? '',
-                style: const TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 20),
               ),
             ),
-            const SizedBox(height: 32),
-            const Text('📋 Exercises:', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
+            const SizedBox(height: 36),
+            const Text(
+              'Exercises:',
+              style: TextStyle(
+                  fontSize: 26, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
             ..._buildExercisesList(workout!['exercises']),
           ],
         ),
@@ -139,12 +134,16 @@ class _PredefinedWorkoutDetailScreenState extends State<PredefinedWorkoutDetailS
   Widget _infoBlock() {
     return Container(
       padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Column(
         children: [
-          _infoRow('⏱ Duration:', workout!['duration']),
-          _infoRow('🔥 Calories:', workout!['calories']),
-          _infoRow('🌀 Sets/Reps:', workout!['sets_reps']),
-          _infoRow('😮‍💨 Rest:', workout!['rest']),
+          _infoRow('Duration:', workout!['duration']),
+          _infoRow('Calories:', workout!['calories']),
+          _infoRow('Sets/Reps:', workout!['sets_reps']),
+          _infoRow('Rest:', workout!['rest']),
         ],
       ),
     );
@@ -152,13 +151,18 @@ class _PredefinedWorkoutDetailScreenState extends State<PredefinedWorkoutDetailS
 
   Widget _infoRow(String label, String? value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 14),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-          const SizedBox(width: 6),
-          Expanded(child: Text(value ?? '-', style: const TextStyle(fontSize: 18))),
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 20, fontWeight: FontWeight.w600)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(value ?? '-',
+                style: const TextStyle(fontSize: 20)),
+          ),
         ],
       ),
     );
@@ -167,48 +171,55 @@ class _PredefinedWorkoutDetailScreenState extends State<PredefinedWorkoutDetailS
   List<Widget> _buildExercisesList(List exercises) {
     return exercises.map<Widget>((exercise) {
       return Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.only(bottom: 18),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           boxShadow: [
-            BoxShadow(color: Colors.grey.shade300, blurRadius: 6, offset: const Offset(0, 2)),
+            BoxShadow(
+              color: Colors.grey.shade300,
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
           ],
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GestureDetector(
-              onTap: () {
-                if (exercise['image'] != null) {
-                  _showFullscreen(exercise['image'], isImage: true);
-                }
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: exercise['image'] != null
-                    ? Image.network(
-                  exercise['image'],
-                  width: 70,
-                  height: 70,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => _fallbackIcon(),
-                )
-                    : _fallbackIcon(),
-              ),
-            ),
-            const SizedBox(width: 12),
+            if (exercise['image'] != null)
+              GestureDetector(
+                onTap: () =>
+                    _showFullscreen(exercise['image'], isImage: true),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.network(
+                    exercise['image'],
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _fallbackIcon(),
+                  ),
+                ),
+              )
+            else
+              _fallbackIcon(),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(exercise['name'] ?? 'Unnamed', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text(exercise['reps_sets'] ?? '-', style: const TextStyle(fontSize: 16)),
+                  Text(exercise['name'] ?? 'Unnamed',
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text(exercise['reps_sets'] ?? '-',
+                      style: const TextStyle(fontSize: 18)),
                   const SizedBox(height: 6),
                   GestureDetector(
-                    onTap: () => _showFullscreen(exercise['description'] ?? ''),
-                    child: Text(exercise['description'] ?? '', style: const TextStyle(fontSize: 16)),
+                    onTap: () =>
+                        _showFullscreen(exercise['description'] ?? ''),
+                    child: Text(exercise['description'] ?? '',
+                        style: const TextStyle(fontSize: 18)),
                   ),
                 ],
               ),
@@ -220,9 +231,8 @@ class _PredefinedWorkoutDetailScreenState extends State<PredefinedWorkoutDetailS
   }
 
   Widget _fallbackIcon() => Container(
-    width: 70,
-    height: 70,
+    width: 80,
+    height: 80,
     color: Colors.grey.shade200,
-    child: const Icon(Icons.image_not_supported),
   );
 }

@@ -188,6 +188,7 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
     final itemWidth = MediaQuery.of(context).size.width / crossAxisCount - 32;
 
     return Scaffold(
+      key: const Key('weekly-plan-days'),
       appBar: AppBar(
         title: const Text('My Weekly Plan'),
       ),
@@ -206,7 +207,7 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
       ),
     );
   }
-
+  
   @override
   void dispose() {
     _controller.dispose();

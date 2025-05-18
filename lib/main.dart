@@ -41,48 +41,35 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
     style: ElevatedButton.styleFrom(
       foregroundColor: Colors.white,
       iconColor: Colors.white,
-    )
+    ),
   ),
   textButtonTheme: TextButtonThemeData(
     style: TextButton.styleFrom(
       foregroundColor: Colors.white,
-    )
-  )
+    ),
+  ),
 );
 
 // Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 //   print('Handling a background message: ${message.messageId}');
 // }
 
-void main() async {
-  // if (Platform.isAndroid) {
-  //   WidgetsFlutterBinding.ensureInitialized();
-  //   await Firebase.initializeApp();
-  //   // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  //   await FirebaseMessaging.instance.requestPermission(
-  //     alert: true,
-  //     announcement: true,
-  //     badge: true,
-  //     carPlay: false,
-  //     criticalAlert: false,
-  //     sound: true,
-  //   );
-  //   String? token = await FirebaseMessaging.instance.getToken();
-  //   print('FCM Token: $token');
-  // }
-  
-
+// Entry point with optional test mode and testTargetScreen override
+void main({bool isTesting = false, Widget? testTargetScreen}) {
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeNotifier(),
-      child: const MyApp(),
+      child: MyApp(isTesting: isTesting, testTargetScreen: testTargetScreen),
     ),
   );
 }
 
+// Root widget, allows injecting a specific screen for testing
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isTesting;
+  final Widget? testTargetScreen;
+
+  const MyApp({super.key, this.isTesting = false, this.testTargetScreen});
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +79,9 @@ class MyApp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: themeNotifier.themeMode,
-      home: const AuthorizationScreen(),
+      home: isTesting
+          ? (testTargetScreen ?? const RunningTrackerScreen(isTesting: true))
+          : const AuthorizationScreen(),
     );
     // return MaterialApp(
     //   home: TestScreen(),

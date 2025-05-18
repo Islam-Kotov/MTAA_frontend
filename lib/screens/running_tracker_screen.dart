@@ -9,9 +9,15 @@ import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'run_history_screen.dart';
+import 'package:semestral_project/utils.dart';
 
 class RunningTrackerScreen extends StatefulWidget {
-  const RunningTrackerScreen({super.key});
+  final bool isTesting; // Added for test mode
+
+  const RunningTrackerScreen({
+    super.key,
+    this.isTesting = false, //  default is false
+  });
 
   @override
   State<RunningTrackerScreen> createState() => _RunningTrackerScreenState();
@@ -46,10 +52,31 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _initialize());
+
+    if (widget.isTesting) {
+      // Immediately render full UI in test mode
+      setState(() {
+        _gpsEnabled = true;
+        _isMapReady = true;
+        _isRunning = false;
+        _currentLatLng = const LatLng(48.0, 17.0); // dummy value to avoid map failure
+      });
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _initialize());
+    }
   }
 
+
   Future<void> _initialize() async {
+    if (widget.isTesting) {
+      setState(() {
+        _gpsEnabled = true;
+        _isMapReady = true;
+        _isRunning = false;
+      });
+      return;
+    }
+
     final permissionStatus = await _location.hasPermission();
     if (permissionStatus == PermissionStatus.denied) {
       final request = await _location.requestPermission();
@@ -101,7 +128,12 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
     _locationSubscription = _location.onLocationChanged.listen((newLocation) {
       final newLatLng = LatLng(newLocation.latitude!, newLocation.longitude!);
       if (_isRunning && _lastLocation != null) {
-        final d = _calculateDistance(_lastLocation!, newLocation);
+        final d = calculateDistance(
+          _lastLocation!.latitude!,
+          _lastLocation!.longitude!,
+          newLocation.latitude!,
+          newLocation.longitude!,
+        );
         if (!mounted) return;
         setState(() {
           _distance += d;
@@ -138,10 +170,10 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
     _locationSubscription?.cancel();
     _motivationTimer?.cancel();
 
-    if (_distance == 0.0) {
-      _resetRun();
-      return;
-    }
+    // if (_distance == 0.0) {
+    //   _resetRun();
+    //   return;
+    // }
 
     final shouldSave = await showDialog<bool>(
       context: context,
@@ -185,7 +217,9 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
     if (token == null) return;
 
     final seconds = _stopwatch.elapsed.inSeconds;
-    if (seconds == 0 || _distance == 0.0) return;
+    if (seconds == 0 || _distance == 0.0) {
+      debugPrint("Run has 0 distance or 0 time — still submitting.");
+    }
 
     final avgSpeed = (_distance / 1000) / (seconds / 3600);
     final startTime = DateTime.now().subtract(_stopwatch.elapsed).toIso8601String();
@@ -223,40 +257,29 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (_stopwatch.isRunning && mounted) {
-        setState(() => _elapsedTime = _formatDuration(_stopwatch.elapsed));
+        setState(() => _elapsedTime = formatDuration(_stopwatch.elapsed));
       }
     });
   }
 
-  String _formatDuration(Duration d) {
-    final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return "$minutes:$seconds";
-  }
-
   String _averageSpeedText() {
-    final seconds = _stopwatch.elapsed.inSeconds;
-    if (seconds < 5 || _distance < 5.0) return "0.00 km/h";
-    final hours = seconds / 3600;
-    final km = _distance / 1000;
-    final speed = km / hours;
-    return "${speed.toStringAsFixed(2)} km/h";
+    return calculateAverageSpeed(_distance, _stopwatch.elapsed);
   }
 
-  double _calculateDistance(LocationData last, LocationData current) {
-    const R = 6371000;
-    final dLat = _degToRad(current.latitude! - last.latitude!);
-    final dLon = _degToRad(current.longitude! - last.longitude!);
-    final a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_degToRad(last.latitude!)) *
-            cos(_degToRad(current.latitude!)) *
-            sin(dLon / 2) *
-            sin(dLon / 2);
-    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
-    return R * c;
-  }
-
-  double _degToRad(double deg) => deg * (pi / 180);
+  // double _calculateDistance(LocationData last, LocationData current) {
+  //   const R = 6371000;
+  //   final dLat = _degToRad(current.latitude! - last.latitude!);
+  //   final dLon = _degToRad(current.longitude! - last.longitude!);
+  //   final a = sin(dLat / 2) * sin(dLat / 2) +
+  //       cos(_degToRad(last.latitude!)) *
+  //           cos(_degToRad(current.latitude!)) *
+  //           sin(dLon / 2) *
+  //           sin(dLon / 2);
+  //   final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+  //   return R * c;
+  // }
+  //
+  // double _degToRad(double deg) => deg * (pi / 180);
 
   @override
   void dispose() {
@@ -286,7 +309,6 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
           : LayoutBuilder(
         builder: (context, constraints) {
           final isTablet = constraints.maxWidth >= 700;
-
           return Column(
             children: [
               if (_showMotivation)
@@ -409,10 +431,25 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: Theme.of(context).textTheme.bodyMedium),
-          Text(value, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+          Expanded(
+            flex: 1,
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            flex: 2,
+            child: Text(
+              value,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );

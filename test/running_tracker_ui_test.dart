@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:semestral_project/screens/running_tracker_screen.dart';
-import 'package:semestral_project/screens/run_history_screen.dart';
 
 void main() {
   group('RunningTrackerScreen UI Tests', () {

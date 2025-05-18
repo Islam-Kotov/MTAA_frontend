@@ -747,7 +747,6 @@ class SettingsPage extends StatelessWidget {
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isTablet = constraints.maxWidth >= 600;
-          final orientation = MediaQuery.of(context).orientation;
 
           if (isTablet) {
             return  Column(

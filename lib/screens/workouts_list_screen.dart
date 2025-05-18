@@ -87,8 +87,7 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
         filteredWorkouts = type == null
             ? workouts
             : workouts
-            .where((w) => (w['exercise_type']?.toLowerCase() ?? '')
-            .contains(type.toLowerCase()))
+            .where((w) => (w['exercise_type']?.toLowerCase() ?? '').contains(type.toLowerCase()))
             .toList();
         isFiltering = false;
       });
@@ -199,82 +198,112 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
           ),
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-        children: [
-          if (selectedFilter != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: Text('Filter: $selectedFilter', style: theme.textTheme.bodyLarge),
-            ),
-          Expanded(
-            child: isFiltering
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-              itemCount: filteredWorkouts.length,
-              padding: const EdgeInsets.all(16),
-              itemBuilder: (context, index) {
-                final workout = filteredWorkouts[index];
-                final imageUrl = workout['exercise_photo'];
-                final heroTag = 'exercise-image-${workout['id']}';
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isTablet = constraints.maxWidth > 600;
 
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  elevation: 4,
-                  child: ListTile(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => WorkoutDetailScreen(
-                            workoutId: workout['id'],
-                            heroTag: heroTag,
-                          ),
-                        ),
-                      );
-                    },
-                    contentPadding: const EdgeInsets.all(14),
-                    leading: Hero(
-                      tag: heroTag,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: imageUrl != null
-                            ? Image.network(
-                          imageUrl,
-                          width: 60,
-                          height: 60,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            width: 60,
-                            height: 60,
-                            color: Colors.grey.shade300,
-                            child: const Icon(Icons.broken_image),
-                          ),
-                        )
-                            : Container(
-                          width: 60,
-                          height: 60,
-                          color: Colors.grey.shade300,
-                          child: const Icon(Icons.image_not_supported),
-                        ),
-                      ),
+          if (isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return Column(
+            children: [
+              if (selectedFilter != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: Text('Filter: $selectedFilter', style: theme.textTheme.bodyLarge),
+                ),
+              Expanded(
+                child: isFiltering
+                    ? const Center(child: CircularProgressIndicator())
+                    : Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: isTablet ? 700 : double.infinity,
                     ),
-                    title: Text(workout['exercise_name'] ?? 'Unnamed'),
-                    subtitle: Text(workout['exercise_type'] ?? ''),
-                    trailing: widget.selectedDay != null
-                        ? IconButton(
-                      icon: const Icon(Icons.add_circle, size: 32, color: Colors.blue),
-                      onPressed: () => showAddDialog(workout['id']),
-                    )
-                        : null,
+                    child: ListView.builder(
+                      itemCount: filteredWorkouts.length,
+                      padding: const EdgeInsets.all(16),
+                      itemBuilder: (context, index) {
+                        final workout = filteredWorkouts[index];
+                        final imageUrl = workout['exercise_photo'];
+                        final heroTag = 'exercise-image-${workout['id']}';
+
+                        return Card(
+                          color: theme.cardColor,
+                          margin: const EdgeInsets.only(bottom: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 4,
+                          child: ListTile(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => WorkoutDetailScreen(
+                                    workoutId: workout['id'],
+                                    heroTag: heroTag,
+                                  ),
+                                ),
+                              );
+                            },
+                            contentPadding: const EdgeInsets.all(14),
+                            leading: Hero(
+                              tag: heroTag,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: imageUrl != null
+                                    ? Image.network(
+                                  imageUrl,
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Container(
+                                    width: 60,
+                                    height: 60,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade300,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Icon(Icons.broken_image, color: Colors.black54),
+                                  ),
+                                )
+                                    : Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade300,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(Icons.image_not_supported, color: Colors.black54),
+                                ),
+                              ),
+                            ),
+                            title: Text(
+                              workout['exercise_name'] ?? 'Unnamed',
+                              style: theme.textTheme.titleMedium,
+                            ),
+                            subtitle: Text(
+                              workout['exercise_type'] ?? '',
+                              style: theme.textTheme.bodySmall,
+                            ),
+                            trailing: widget.selectedDay != null
+                                ? IconButton(
+                              icon: const Icon(Icons.add_circle, size: 32, color: Colors.blue),
+                              onPressed: () => showAddDialog(workout['id']),
+                            )
+                                : null,
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                );
-              },
-            ),
-          ),
-        ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

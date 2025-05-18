@@ -28,7 +28,6 @@ class _FriendsScreenState extends State<FriendsScreen> with TickerProviderStateM
     super.initState();
     fetchFriendsData();
 
-
     Future.delayed(const Duration(milliseconds: 150), () {
       if (mounted) setState(() => _opacityFriends = 1.0);
     });
@@ -278,43 +277,55 @@ class _FriendsScreenState extends State<FriendsScreen> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = MediaQuery.of(context).size.width > 600;
+    final content = Column(
+      children: [
+        _buildStyledSection(Icons.people, 'Friends', friends, 'friends', _opacityFriends),
+        const SizedBox(height: 20),
+        _buildStyledSection(Icons.person_add, 'Incoming Requests', incomingRequests, 'incoming', _opacityIncoming),
+        const SizedBox(height: 20),
+        _buildStyledSection(Icons.outbox, 'Outgoing Requests', outgoingRequests, 'outgoing', _opacityOutgoing),
+        const SizedBox(height: 30),
+        AnimatedOpacity(
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeInOut,
+          opacity: _opacityButton,
+          child: ElevatedButton.icon(
+            onPressed: _showAddFriendDialog,
+            icon: const Icon(Icons.person_add_alt_1),
+            label: const Text('Add Friend'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              elevation: 5,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Friends'),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
-        padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildStyledSection(Icons.people, 'Friends', friends, 'friends', _opacityFriends),
-              const SizedBox(height: 20),
-              _buildStyledSection(Icons.person_add, 'Incoming Requests', incomingRequests, 'incoming', _opacityIncoming),
-              const SizedBox(height: 20),
-              _buildStyledSection(Icons.outbox, 'Outgoing Requests', outgoingRequests, 'outgoing', _opacityOutgoing),
-              const SizedBox(height: 30),
-              AnimatedOpacity(
-                duration: const Duration(milliseconds: 600),
-                curve: Curves.easeInOut,
-                opacity: _opacityButton,
-                child: ElevatedButton.icon(
-                  onPressed: _showAddFriendDialog,
-                  icon: const Icon(Icons.person_add_alt_1),
-                  label: const Text('Add Friend'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                    elevation: 5,
-                  ),
-                ),
+          : LayoutBuilder(
+        builder: (context, constraints) {
+          return Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: isTablet ? 700 : double.infinity,
               ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: SingleChildScrollView(child: content),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -15,13 +15,7 @@ class WeeklyPlanDaysScreen extends StatefulWidget {
 class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
     with SingleTickerProviderStateMixin {
   final List<String> weekDays = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday'
+    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
   ];
 
   late AnimationController _controller;
@@ -76,7 +70,7 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
       setState(() {
         dayData = result;
         isLoading = false;
-        _controller.forward();
+        _controller.forward(from: 0);
       });
     } else {
       log('Failed to load weekly plan: ${response.statusCode}');
@@ -90,89 +84,84 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
       MaterialPageRoute(
         builder: (_) => WeeklyPlanDetailScreen(dayOfWeek: day),
       ),
-    ).then((_) => fetchWeeklyPlanData());
+    ).then((_) async {
+      setState(() => isLoading = true);
+      await fetchWeeklyPlanData();
+    });
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Widget buildAnimatedDayTile(String day, int index) {
+  Widget buildDayCard(String day, int index, double width) {
     final theme = Theme.of(context);
     final info = dayData[day];
     final title = info?['title'] as String?;
     final hasExercises = info?['hasExercises'] == true;
     final description = info?['description'] ?? '';
     final scheduledTime = info?['scheduled_time'];
+    final baseTextColor = hasExercises
+        ? theme.colorScheme.onSurface
+        : theme.colorScheme.onSurface.withOpacity(0.6);
 
     final displayText = title != null && title.trim().isNotEmpty
         ? '$day — $title'
         : '$day — No title set';
 
-    final color = hasExercises ? Colors.black : Colors.grey.shade500;
-
     return FadeTransition(
       opacity: Tween<double>(begin: 0, end: 1).animate(
         CurvedAnimation(
           parent: _controller,
-          curve: Interval(
-            0.1 * index,
-            (0.1 * index + 0.5).clamp(0.0, 1.0),
-            curve: Curves.easeOut,
-          ),
+          curve: Interval(0.1 * index, (0.1 * index + 0.5).clamp(0.0, 1.0),
+              curve: Curves.easeOut),
         ),
       ),
       child: GestureDetector(
         onTap: () => navigateToDayDetail(day),
-        child: Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          elevation: 5,
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          shadowColor: theme.shadowColor.withOpacity(0.15),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 26),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        displayText,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: color,
+        child: SizedBox(
+          width: width,
+          child: Card(
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            elevation: 5,
+            margin: const EdgeInsets.all(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          displayText,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: baseTextColor,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ),
-                    const Icon(Icons.chevron_right, size: 26),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        description.isNotEmpty
-                            ? description
-                            : 'No description set',
-                        style: TextStyle(fontSize: 14, color: color),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        scheduledTime != null
-                            ? 'Scheduled at: $scheduledTime'
-                            : 'No time set',
-                        style: TextStyle(fontSize: 14, color: color),
-                      ),
+                      const Icon(Icons.chevron_right, size: 24),
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 10),
+                  if (description.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Text(
+                        description,
+                        style: TextStyle(fontSize: 14, color: baseTextColor),
+                      ),
+                    ),
+                  Text(
+                    scheduledTime != null
+                        ? 'Scheduled at: $scheduledTime'
+                        : 'No time set',
+                    style: TextStyle(fontSize: 14, color: baseTextColor),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -182,19 +171,26 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = MediaQuery.of(context).size.width > 600;
+    final crossAxisCount = isTablet ? 2 : 1;
+    final itemWidth = MediaQuery.of(context).size.width / crossAxisCount - 32;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Weekly Plan'),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
+          : SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        itemCount: weekDays.length,
-        itemBuilder: (context, index) {
-          final day = weekDays[index];
-          return buildAnimatedDayTile(day, index);
-        },
+        child: Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          children: [
+            for (int i = 0; i < weekDays.length; i++)
+              buildDayCard(weekDays[i], i, itemWidth),
+          ],
+        ),
       ),
     );
   }

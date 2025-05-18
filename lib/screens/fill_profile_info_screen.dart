@@ -1,8 +1,7 @@
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'dart:async';
 import 'all_screens.dart';
 
 Future<bool> saveProfileWithGender(String weight, String height, String birthdate, String? gender) async {
@@ -10,8 +9,8 @@ Future<bool> saveProfileWithGender(String weight, String height, String birthdat
     print('Gender not picked');
     return false;
   }
-  final url = Uri.parse('http://192.168.1.36:8000/api/profile');
 
+  final url = Uri.parse('http://192.168.1.36:8000/api/profile');
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('api_token');
 
@@ -29,13 +28,7 @@ Future<bool> saveProfileWithGender(String weight, String height, String birthdat
     }),
   );
 
-  if (response.statusCode == 200) {
-    print('${response.body}');
-    return true;
-  } else {
-    print('${response.body}');
-    return false;
-  }
+  return response.statusCode == 200;
 }
 
 enum Gender { male, female }
@@ -49,6 +42,9 @@ class FillProfileInfoScreen extends StatefulWidget {
 
 class _FillProfileInfoScreen extends State<FillProfileInfoScreen> {
   Gender? _gender;
+  final birthdateController = TextEditingController();
+  final weightController = TextEditingController();
+  final heightController = TextEditingController();
 
   void setGender(Gender? value) {
     setState(() {
@@ -56,9 +52,18 @@ class _FillProfileInfoScreen extends State<FillProfileInfoScreen> {
     });
   }
 
-  final birthdateController = TextEditingController();
-  final weightController = TextEditingController();
-  final heightController = TextEditingController();
+  Widget buildInputField(String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,93 +74,81 @@ class _FillProfileInfoScreen extends State<FillProfileInfoScreen> {
           title: const Text('Complete profile info'),
           backgroundColor: const Color.fromRGBO(57, 132, 173, 1),
         ),
-        backgroundColor: Color.fromRGBO(207, 228, 242, 1),
-        body: Column(
-          children: [
-            ListTile(
-              title: const Text('Male'),
-              leading: Radio<Gender>(
-                value: Gender.male,
-                groupValue: _gender,
-                onChanged: setGender,
-              ),
-            ),
-            ListTile(
-              title: const Text('Female'),
-              leading: Radio<Gender>(
-                value: Gender.female,
-                groupValue: _gender,
-                onChanged: setGender,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24.0),
-              child: Column(
-                spacing: 24,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextField(
-                    controller: weightController,
-                    decoration: InputDecoration(
-                      labelText: 'Weight',
-                      border: OutlineInputBorder()
+        backgroundColor: const Color.fromRGBO(207, 228, 242, 1),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final isTablet = constraints.maxWidth > 600;
+
+            return Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: isTablet ? 500 : double.infinity,
+                ),
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                  children: [
+                    ListTile(
+                      title: const Text('Male'),
+                      leading: Radio<Gender>(
+                        value: Gender.male,
+                        groupValue: _gender,
+                        onChanged: setGender,
+                      ),
                     ),
-                  ),
-                  TextField(
-                    controller: heightController,
-                    decoration: InputDecoration(
-                      labelText: 'Height',
-                      border: OutlineInputBorder()
+                    ListTile(
+                      title: const Text('Female'),
+                      leading: Radio<Gender>(
+                        value: Gender.female,
+                        groupValue: _gender,
+                        onChanged: setGender,
+                      ),
                     ),
-                  ),
-                  TextField(
-                    controller: birthdateController,
-                    decoration: InputDecoration(
-                      labelText: 'Birthdate',
-                      border: OutlineInputBorder()
+                    buildInputField('Weight', weightController),
+                    buildInputField('Height', heightController),
+                    buildInputField('Birthdate', birthdateController),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final weight = weightController.text;
+                        final height = heightController.text;
+                        final birthdate = birthdateController.text;
+                        String? gender;
+
+                        switch (_gender) {
+                          case Gender.male:
+                            gender = 'male';
+                            break;
+                          case Gender.female:
+                            gender = 'female';
+                            break;
+                          default:
+                            gender = null;
+                        }
+
+                        final success = await saveProfileWithGender(weight, height, birthdate, gender);
+
+                        if (!mounted) return;
+
+                        if (success) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => const HomeScreen()),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Profile info save failed')),
+                          );
+                        }
+                      },
+                      child: const Text('Confirm'),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-
-                final weight = weightController.text;
-                final height = heightController.text;
-                final birthdate = birthdateController.text;
-                String? gender = null;
-
-                switch (_gender) {
-                  case Gender.male:
-                    gender = 'male';
-                    break;
-                  case Gender.female:
-                    gender = 'female';
-                    break;
-                  default:
-                }
-
-                final success = await saveProfileWithGender(weight, height, birthdate, gender);
-
-                if (!mounted) return; // Prevent using context if widget is disposed
-
-                if (success) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HomeScreen()),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Profile info save failed')),
-                  );
-                }
-              },
-              child: Text('Confirm')
-            )
-          ],
-        )
-      )
+            );
+          },
+        ),
+      ),
     );
   }
 }

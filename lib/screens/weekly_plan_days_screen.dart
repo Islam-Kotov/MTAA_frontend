@@ -105,62 +105,70 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
         ? '$day — $title'
         : '$day — No title set';
 
+    final semanticsLabel = StringBuffer(displayText);
+    if (description.isNotEmpty) {
+      semanticsLabel.write(', $description');
+    }
+    if (scheduledTime != null) {
+      semanticsLabel.write(', Scheduled at $scheduledTime');
+    }
+
     return FadeTransition(
       opacity: Tween<double>(begin: 0, end: 1).animate(
         CurvedAnimation(
           parent: _controller,
-          curve: Interval(0.1 * index, (0.1 * index + 0.5).clamp(0.0, 1.0),
-              curve: Curves.easeOut),
+          curve: Interval(0.1 * index, (0.1 * index + 0.5).clamp(0.0, 1.0), curve: Curves.easeOut),
         ),
       ),
-      child: GestureDetector(
-        onTap: () => navigateToDayDetail(day),
-        child: SizedBox(
-          width: width,
-          child: Card(
-            shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-            elevation: 5,
-            margin: const EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          displayText,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: baseTextColor,
+      child: Semantics(
+        button: true,
+        label: semanticsLabel.toString(),
+        child: GestureDetector(
+          onTap: () => navigateToDayDetail(day),
+          child: SizedBox(
+            width: width,
+            child: Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              elevation: 5,
+              margin: const EdgeInsets.all(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            displayText,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: baseTextColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const Icon(Icons.chevron_right, size: 24),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    if (description.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Text(
+                          description,
+                          style: TextStyle(fontSize: 14, color: baseTextColor),
                         ),
                       ),
-                      const Icon(Icons.chevron_right, size: 24),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  if (description.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
-                      child: Text(
-                        description,
-                        style: TextStyle(fontSize: 14, color: baseTextColor),
-                      ),
+                    Text(
+                      scheduledTime != null ? 'Scheduled at: $scheduledTime' : 'No time set',
+                      style: TextStyle(fontSize: 14, color: baseTextColor),
                     ),
-                  Text(
-                    scheduledTime != null
-                        ? 'Scheduled at: $scheduledTime'
-                        : 'No time set',
-                    style: TextStyle(fontSize: 14, color: baseTextColor),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

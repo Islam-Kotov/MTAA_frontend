@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'predefined_levels_screen.dart';
-import 'my_own_plan_screen.dart';
 import 'running_tracker_screen.dart';
 import 'weekly_plan_days_screen.dart';
 
@@ -84,7 +82,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                         ),
                       ],
                     ),
-                    child: Icon(Icons.event_note, size: 64),
+                    child: const Icon(Icons.event_note, size: 64),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -98,23 +96,21 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                       width: isTablet ? (constraints.maxWidth - 60) / 2 : double.infinity,
                       child: FadeTransition(
                         opacity: _preparedFade,
-                        child: Semantics(
-                          button: true,
-                          label: 'Choose a prepared workout plan',
-                          child: ElevatedButton.icon(
-                            style: _buttonStyle(),
-                            icon: const Icon(Icons.fitness_center, size: 28),
-                            label: Text(
+                        child: ElevatedButton.icon(
+                          style: _buttonStyle(),
+                          icon: const Icon(Icons.fitness_center, size: 28),
+                          label: ExcludeSemantics(
+                            child: Text(
                               'Choose a Prepared Workout Plan',
                               style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                             ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const PredefinedLevelsScreen()),
-                              );
-                            },
                           ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const PredefinedLevelsScreen()),
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -124,23 +120,21 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                       width: isTablet ? (constraints.maxWidth - 60) / 2 : double.infinity,
                       child: FadeTransition(
                         opacity: _customFade,
-                        child: Semantics(
-                          button: true,
-                          label: 'Create my own workout plan',
-                          child: ElevatedButton.icon(
-                            style: _buttonStyle(),
-                            icon: const Icon(Icons.edit_note, size: 28),
-                            label: Text(
+                        child: ElevatedButton.icon(
+                          style: _buttonStyle(),
+                          icon: const Icon(Icons.edit_note, size: 28),
+                          label: ExcludeSemantics(
+                            child: Text(
                               'Create My Own Plan',
                               style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                             ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const WeeklyPlanDaysScreen()),
-                              );
-                            },
                           ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const WeeklyPlanDaysScreen()),
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -153,7 +147,6 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                         child: Semantics(
                           button: true,
                           label: 'Go for a run',
-                          excludeSemantics: true,
                           child: GestureDetector(
                             onTap: () {
                               Navigator.push(
@@ -169,19 +162,21 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                                   BoxShadow(
                                     color: Theme.of(context).shadowColor,
                                     blurRadius: 6,
-                                    offset: Offset(0, 3),
+                                    offset: const Offset(0, 3),
                                   ),
                                 ],
                               ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.directions_run, size: 40),
+                                  const Icon(Icons.directions_run, size: 40),
                                   const SizedBox(height: 10),
-                                  Text(
-                                    'Go for a run',
-                                    style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                                    textAlign: TextAlign.center,
+                                  ExcludeSemantics(
+                                    child: Text(
+                                      'Go for a run',
+                                      style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ),
                                 ],
                               ),

@@ -70,28 +70,19 @@ class _WeeklyPlanDetailScreenState extends State<WeeklyPlanDetailScreen> {
 
   Future<void> updateMeta() async {
     if (apiToken == null) return;
-    final timeRegex = RegExp(r'^\d{2}:\d{2}$');
-    final timeText = timeController.text.trim();
-
-    if (timeText.isNotEmpty && !timeRegex.hasMatch(timeText)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Time must be in HH:mm format')),
-      );
-      return;
-    }
-
     final uri = Uri.parse('http://192.168.1.36:8000/api/weekly-plan/update-meta');
     final response = await http.patch(uri,
-        headers: {
-          'Authorization': 'Bearer $apiToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'day_of_week': widget.dayOfWeek,
-          'title': titleController.text.trim(),
-          'description': descController.text.trim(),
-          'scheduled_time': timeText,
-        }));
+      headers: {
+        'Authorization': 'Bearer $apiToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'day_of_week': widget.dayOfWeek,
+        'title': titleController.text.trim(),
+        'description': descController.text.trim(),
+        'scheduled_time': timeController.text.trim(),
+      }),
+    );
 
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -106,16 +97,17 @@ class _WeeklyPlanDetailScreenState extends State<WeeklyPlanDetailScreen> {
   Future<void> updateExercise(int workoutId, int sets, int reps) async {
     final uri = Uri.parse('http://192.168.1.36:8000/api/weekly-plan/add');
     final response = await http.post(uri,
-        headers: {
-          'Authorization': 'Bearer $apiToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'day_of_week': widget.dayOfWeek,
-          'workout_id': workoutId,
-          'sets': sets,
-          'repetitions': reps,
-        }));
+      headers: {
+        'Authorization': 'Bearer $apiToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'day_of_week': widget.dayOfWeek,
+        'workout_id': workoutId,
+        'sets': sets,
+        'repetitions': reps,
+      }),
+    );
 
     if (response.statusCode == 200) {
       fetchDayPlan();
@@ -127,14 +119,15 @@ class _WeeklyPlanDetailScreenState extends State<WeeklyPlanDetailScreen> {
   Future<void> removeWorkout(int workoutId) async {
     final uri = Uri.parse('http://192.168.1.36:8000/api/weekly-plan/remove');
     final response = await http.delete(uri,
-        headers: {
-          'Authorization': 'Bearer $apiToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'day_of_week': widget.dayOfWeek,
-          'workout_id': workoutId,
-        }));
+      headers: {
+        'Authorization': 'Bearer $apiToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'day_of_week': widget.dayOfWeek,
+        'workout_id': workoutId,
+      }),
+    );
 
     if (response.statusCode == 200) {
       fetchDayPlan();
@@ -181,13 +174,15 @@ class _WeeklyPlanDetailScreenState extends State<WeeklyPlanDetailScreen> {
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Edit Day Info'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: titleController, decoration: const InputDecoration(labelText: 'Title')),
-            TextField(controller: descController, decoration: const InputDecoration(labelText: 'Description')),
-            TextField(controller: timeController, decoration: const InputDecoration(labelText: 'Scheduled Time (HH:mm)')),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: titleController, decoration: const InputDecoration(labelText: 'Title')),
+              TextField(controller: descController, decoration: const InputDecoration(labelText: 'Description'), maxLines: 3),
+              TextField(controller: timeController, decoration: const InputDecoration(labelText: 'Scheduled Time')),
+            ],
+          ),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
@@ -205,16 +200,14 @@ class _WeeklyPlanDetailScreenState extends State<WeeklyPlanDetailScreen> {
 
   void toggleCompleted(int workoutId) {
     setState(() {
-      if (completedIds.contains(workoutId)) {
-        completedIds.remove(workoutId);
-      } else {
-        completedIds.add(workoutId);
-      }
+      completedIds.contains(workoutId) ? completedIds.remove(workoutId) : completedIds.add(workoutId);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final isWide = MediaQuery.of(context).size.width >= 900;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.dayOfWeek),
@@ -222,92 +215,87 @@ class _WeeklyPlanDetailScreenState extends State<WeeklyPlanDetailScreen> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
+          : Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (title.isNotEmpty || description.isNotEmpty || scheduledTime != null)
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (title.isNotEmpty)
-                    Text('Title: $title', style: const TextStyle(fontSize: 16)),
-                  if (description.isNotEmpty)
-                    Text('Description: $description', style: const TextStyle(fontSize: 15)),
-                  if (scheduledTime != null)
-                    Text('Scheduled Time: $scheduledTime', style: const TextStyle(fontSize: 15)),
-                ],
+          if (isWide)
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: _buildMetaPanel(),
               ),
             ),
-          if (workouts.isEmpty)
-            const Expanded(child: Center(child: Text('No exercises yet.')))
-          else
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: workouts.length,
-                itemBuilder: (context, index) {
-                  final item = workouts[index];
-                  final isCompleted = completedIds.contains(item['workout_id']);
-                  return Card(
-                    elevation: 6,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    child: ListTile(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => WorkoutDetailScreen(
-                              workoutId: item['workout_id'],
-                              heroTag: 'exercise-image-${item['workout_id']}',
-                            ),
+          Expanded(
+            flex: 5,
+            child: workouts.isEmpty
+                ? const Center(child: Text('No exercises yet.'))
+                : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: workouts.length,
+              itemBuilder: (context, index) {
+                final item = workouts[index];
+                final isCompleted = completedIds.contains(item['workout_id']);
+
+                return Card(
+                  elevation: 5,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: ListTile(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => WorkoutDetailScreen(
+                            workoutId: item['workout_id'],
+                            heroTag: 'exercise-image-${item['workout_id']}',
                           ),
-                        );
-                      },
-                      contentPadding: const EdgeInsets.all(20),
-                      title: Text(
-                        item['exercise_name'],
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: isCompleted ? Colors.grey : null,
-                          decoration: isCompleted ? TextDecoration.lineThrough : null,
                         ),
-                      ),
-                      subtitle: Text(
-                        'Sets: ${item['sets']} | Reps: ${item['repetitions']}',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: isCompleted ? Colors.grey : null,
-                          decoration: isCompleted ? TextDecoration.lineThrough : null,
-                        ),
-                      ),
-                      trailing: Wrap(
-                        spacing: 10,
-                        children: [
-                          IconButton(
-                            icon: Icon(
-                              isCompleted ? Icons.check_box : Icons.check_box_outline_blank,
-                              color: isCompleted ? Colors.green : Colors.grey,
-                            ),
-                            onPressed: () => toggleCompleted(item['workout_id']),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.orange),
-                            onPressed: () => showEditDialog(item['workout_id'], item['sets'], item['repetitions']),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => removeWorkout(item['workout_id']),
-                          ),
-                        ],
+                      );
+                    },
+                    contentPadding: const EdgeInsets.all(20),
+                    title: Text(
+                      item['exercise_name'],
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: isCompleted ? Colors.grey : null,
+                        decoration: isCompleted ? TextDecoration.lineThrough : null,
                       ),
                     ),
-                  );
-                },
-              ),
+                    subtitle: Text(
+                      'Sets: ${item['sets']} | Reps: ${item['repetitions']}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: isCompleted ? Colors.grey : null,
+                        decoration: isCompleted ? TextDecoration.lineThrough : null,
+                      ),
+                    ),
+                    trailing: Wrap(
+                      spacing: 10,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            isCompleted ? Icons.check_box : Icons.check_box_outline_blank,
+                            color: isCompleted ? Colors.green : Colors.grey,
+                          ),
+                          onPressed: () => toggleCompleted(item['workout_id']),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.orange),
+                          onPressed: () => showEditDialog(item['workout_id'], item['sets'], item['repetitions']),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => removeWorkout(item['workout_id']),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -323,6 +311,26 @@ class _WeeklyPlanDetailScreenState extends State<WeeklyPlanDetailScreen> {
           fetchDayPlan();
         },
       ),
+    );
+  }
+
+  Widget _buildMetaPanel() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (title.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text('Title: $title', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+          ),
+        if (scheduledTime != null && scheduledTime!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text('Scheduled Time: $scheduledTime', style: const TextStyle(fontSize: 16)),
+          ),
+        if (description.isNotEmpty)
+          Text(description, style: const TextStyle(fontSize: 14)),
+      ],
     );
   }
 }

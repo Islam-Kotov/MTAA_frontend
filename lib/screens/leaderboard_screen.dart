@@ -52,33 +52,43 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = MediaQuery.of(context).size.width > 600;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Friends Leaderboard')),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : leaderboard.isEmpty
           ? const Center(child: Text('No leaderboard data available.'))
-          : ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: leaderboard.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          final entry = leaderboard[index];
-          final name = entry['name'] ?? 'Unknown';
-          final distance = (entry['distance'] / 1000).toStringAsFixed(2);
-          final startedAt = DateTime.parse(entry['started_at']);
-          final dateFormatted = DateFormat.yMMMd().add_Hm().format(startedAt);
-          return ListTile(
-            tileColor: Colors.white10,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            leading: CircleAvatar(
-              child: Text('${index + 1}'),
-            ),
-            title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text("Distance: $distance km\nDuration: ${_formatDuration(entry['duration'])}"),
-            trailing: Text(dateFormatted, style: const TextStyle(fontSize: 12)),
-          );
-        },
+          : Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: isTablet ? 700 : double.infinity),
+          child: ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: leaderboard.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final entry = leaderboard[index];
+              final name = entry['name'] ?? 'Unknown';
+              final distance = (entry['distance'] / 1000).toStringAsFixed(2);
+              final startedAt = DateTime.parse(entry['started_at']);
+              final dateFormatted = DateFormat.yMMMd().add_Hm().format(startedAt);
+              return Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    child: Text('${index + 1}', style: const TextStyle(color: Colors.white)),
+                  ),
+                  title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text("Distance: $distance km\nDuration: ${_formatDuration(entry['duration'])}"),
+                  trailing: Text(dateFormatted, style: const TextStyle(fontSize: 12)),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }

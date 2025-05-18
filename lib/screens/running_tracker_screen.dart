@@ -97,12 +97,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
   }
 
   void _startLocationTracking() async {
-    await _location.changeSettings(
-      accuracy: LocationAccuracy.high,
-      interval: 1000,
-      distanceFilter: 1,
-    );
-
+    await _location.changeSettings(accuracy: LocationAccuracy.high, interval: 1000, distanceFilter: 1);
     _locationSubscription = _location.onLocationChanged.listen((newLocation) {
       final newLatLng = LatLng(newLocation.latitude!, newLocation.longitude!);
       if (_isRunning && _lastLocation != null) {
@@ -215,6 +210,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
 
     if (response.statusCode == 201) {
       _resetRun();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Run saved successfully!')),
       );
@@ -274,83 +270,137 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Running Tracker')),
       body: !_gpsEnabled
-          ? const Center(child: Text('Please enable GPS to start your run.'))
+          ? Center(
+        child: Text(
+          'Please enable GPS to start your run.',
+          style: theme.textTheme.bodyLarge,
+        ),
+      )
           : !_isMapReady
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-        children: [
-          if (_showMotivation)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              color: Colors.orange.shade200,
-              child: const Text(
-                "Keep going! Maintain your pace!",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          SizedBox(
-            height: 300,
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(target: _currentLatLng, zoom: 16),
-              onMapCreated: (controller) => _mapController = controller,
-              myLocationEnabled: true,
-              myLocationButtonEnabled: true,
-              polylines: _polylines,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          : LayoutBuilder(
+        builder: (context, constraints) {
+          final isTablet = constraints.maxWidth >= 700;
+
+          return Column(
+            children: [
+              if (_showMotivation)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  color: Colors.orange.shade200,
+                  child: const Text(
+                    "Keep going! Maintain your pace!",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              Expanded(
+                child: isTablet
+                    ? Row(
                   children: [
-                    _infoTile("Time", _elapsedTime),
-                    _infoTile("Distance", "${(_distance / 1000).toStringAsFixed(2)} km"),
-                    _infoTile("Avg Speed", _averageSpeedText()),
-                    _infoTile("Steps", "$_steps"),
-                    _infoTile("Accel", _accelerationText),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                          onPressed: _isRunning ? _stopRun : _startRun,
-                          child: Text(_isRunning ? 'Stop' : 'Start'),
+                    Expanded(
+                      flex: 3,
+                      child: GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          target: _currentLatLng,
+                          zoom: 16,
                         ),
-                        ElevatedButton(
-                          onPressed: _resetRun,
-                          child: const Text('Reset'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Center(
-                      child: TextButton.icon(
-                        icon: const Icon(Icons.history),
-                        label: const Text('View Run History'),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const RunHistoryScreen()),
-                          );
-                        },
+                        onMapCreated: (controller) => _mapController = controller,
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: true,
+                        polylines: _polylines,
                       ),
-                    )
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: _buildTrackerCard(theme),
+                      ),
+                    ),
                   ],
+                )
+                    : SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 300,
+                        child: GoogleMap(
+                          initialCameraPosition: CameraPosition(
+                            target: _currentLatLng,
+                            zoom: 16,
+                          ),
+                          onMapCreated: (controller) => _mapController = controller,
+                          myLocationEnabled: true,
+                          myLocationButtonEnabled: true,
+                          polylines: _polylines,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: _buildTrackerCard(theme),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildTrackerCard(ThemeData theme) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 4,
+      color: theme.cardColor,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _infoTile("Time", _elapsedTime),
+            _infoTile("Distance", "${(_distance / 1000).toStringAsFixed(2)} km"),
+            _infoTile("Avg Speed", _averageSpeedText()),
+            _infoTile("Steps", "$_steps"),
+            _infoTile("Accel", _accelerationText),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: _isRunning ? _stopRun : _startRun,
+                  child: Text(_isRunning ? 'Stop' : 'Start'),
+                ),
+                ElevatedButton(
+                  onPressed: _resetRun,
+                  child: const Text('Reset'),
+                ),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            Center(
+              child: TextButton.icon(
+                icon: const Icon(Icons.history),
+                label: const Text('View Run History'),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const RunHistoryScreen()),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -361,8 +411,8 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 16)),
-          Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(label, style: Theme.of(context).textTheme.bodyMedium),
+          Text(value, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
         ],
       ),
     );

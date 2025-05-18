@@ -33,6 +33,8 @@ class WorkoutDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = MediaQuery.of(context).size.width > 700;
+
     return Scaffold(
       appBar: AppBar(title: const Text("Exercise Detail")),
       body: FutureBuilder<Map?>(
@@ -53,123 +55,120 @@ class WorkoutDetailScreen extends StatelessWidget {
             );
           }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (workout['exercise_photo'] != null)
-                  GestureDetector(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (_) => GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Scaffold(
-                            backgroundColor: Colors.black.withOpacity(0.95),
-                            body: Center(
-                              child: Hero(
-                                tag: heroTag,
-                                child: InteractiveViewer(
-                                  child: Image.network(
-                                    workout['exercise_photo'],
-                                    fit: BoxFit.contain,
+          return Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: isTablet ? 800 : double.infinity),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (workout['exercise_photo'] != null)
+                      GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (_) => GestureDetector(
+                              onTap: () => Navigator.pop(context),
+                              child: Scaffold(
+                                backgroundColor: Colors.black.withOpacity(0.95),
+                                body: Center(
+                                  child: Hero(
+                                    tag: heroTag,
+                                    child: InteractiveViewer(
+                                      child: Image.network(
+                                        workout['exercise_photo'],
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        child: Hero(
+                          tag: heroTag,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(14),
+                            child: Image.network(
+                              workout['exercise_photo'],
+                              width: double.infinity,
+                              height: 220,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                height: 220,
+                                color: Colors.grey.shade300,
+                                child: const Icon(Icons.broken_image, size: 50),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                    const SizedBox(height: 20),
+
+                    Text(
+                      workout['exercise_name'] ?? 'Unnamed',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    _infoCard(
+                      icon: Icons.fitness_center_outlined,
+                      label: 'Target Muscles',
+                      value: workout['main_muscles'] ?? 'N/A',
+                    ),
+                    const SizedBox(height: 18),
+
+                    _infoCard(
+                      icon: Icons.build_outlined,
+                      label: 'Equipment Required',
+                      value: workout['equipment_req'] ?? 'N/A',
+                    ),
+                    const SizedBox(height: 18),
+
+                    GestureDetector(
+                      onTap: () {
+                        showGeneralDialog(
+                          context: context,
+                          barrierDismissible: true,
+                          barrierLabel: 'ExecutionGuide',
+                          barrierColor: Colors.black.withOpacity(0.85),
+                          transitionDuration: const Duration(milliseconds: 250),
+                          pageBuilder: (_, __, ___) => Center(
+                            child: Material(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Container(
+                                width: MediaQuery.of(context).size.width * 0.9,
+                                padding: const EdgeInsets.all(24),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).cardColor,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: SingleChildScrollView(
+                                  child: Text(
+                                    workout['execution_guide'] ?? 'N/A',
+                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, height: 1.6),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                    child: Hero(
-                      tag: heroTag,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
-                        child: Image.network(
-                          workout['exercise_photo'],
-                          width: double.infinity,
-                          height: 220,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            height: 220,
-                            color: Colors.grey.shade300,
-                            child: const Icon(Icons.broken_image, size: 50),
-                          ),
-                        ),
+                        );
+                      },
+                      child: _infoCard(
+                        icon: Icons.description_outlined,
+                        label: 'Execution Guide (Tap to Expand)',
+                        value: workout['execution_guide'] ?? 'N/A',
+                        multiline: true,
+                        isClickable: true,
                       ),
                     ),
-                  ),
-
-                const SizedBox(height: 20),
-
-                Text(
-                  workout['exercise_name'] ?? 'Unnamed',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 26,
-                    color: Colors.black,
-                  ),
+                  ],
                 ),
-
-                const SizedBox(height: 28),
-
-                _infoCard(
-                  icon: Icons.fitness_center_outlined,
-                  label: 'Target Muscles',
-                  value: workout['main_muscles'] ?? 'N/A',
-                ),
-                const SizedBox(height: 18),
-
-                _infoCard(
-                  icon: Icons.build_outlined,
-                  label: 'Equipment Required',
-                  value: workout['equipment_req'] ?? 'N/A',
-                ),
-                const SizedBox(height: 18),
-
-                GestureDetector(
-                  onTap: () {
-                    showGeneralDialog(
-                      context: context,
-                      barrierDismissible: true,
-                      barrierLabel: 'ExecutionGuide',
-                      barrierColor: Colors.black.withOpacity(0.85),
-                      transitionDuration: const Duration(milliseconds: 250),
-                      pageBuilder: (_, __, ___) => Center(
-                        child: Material(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.9,
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: SingleChildScrollView(
-                              child: Text(
-                                workout['execution_guide'] ?? 'N/A',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  height: 1.6,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                  child: _infoCard(
-                    icon: Icons.description_outlined,
-                    label: 'Execution Guide (Tap to Expand)',
-                    value: workout['execution_guide'] ?? 'N/A',
-                    multiline: true,
-                    isClickable: true,
-                  ),
-                ),
-              ],
+              ),
             ),
           );
         },

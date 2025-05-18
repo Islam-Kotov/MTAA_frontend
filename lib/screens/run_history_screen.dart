@@ -55,67 +55,80 @@ class _RunHistoryScreenState extends State<RunHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Run History')),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _runs.isEmpty
           ? const Center(child: Text('No runs found.'))
-          : ListView.builder(
-        itemCount: _runs.length,
-        padding: const EdgeInsets.all(16),
-        itemBuilder: (context, index) {
-          final run = _runs[index];
-          final startedAt = DateTime.parse(run['started_at']);
-          final formattedDate =
-          DateFormat.yMMMd().add_Hm().format(startedAt);
+          : LayoutBuilder(
+        builder: (context, constraints) {
+          final isTablet = constraints.maxWidth >= 700;
 
-          return InkWell(
-            onTap: () {
-              if (run['route'] != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => RunMapScreen(routeJson: jsonEncode(run['route'])),
-                  ),
-                );
-              }
-            },
-            child: Card(
-              elevation: 4,
-              margin: const EdgeInsets.only(bottom: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      formattedDate,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text("Distance: ${(run['distance'] / 1000).toStringAsFixed(2)} km"),
-                    Text("Duration: ${_formatDuration(run['duration'])}"),
-                    Text("Avg Speed: ${run['avg_speed'].toStringAsFixed(2)} km/h"),
-                    Text("Steps: ${run['steps']}"),
-                    if (run['route'] != null)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 8),
-                        child: Text(
-                          "Tap to view route on map",
-                          style: TextStyle(fontSize: 14, color: Colors.blue),
+          return GridView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: _runs.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: isTablet ? 2 : 1,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: isTablet ? 2.8 : 2.2,
+            ),
+            itemBuilder: (context, index) {
+              final run = _runs[index];
+              final startedAt = DateTime.parse(run['started_at']);
+              final formattedDate = DateFormat.yMMMd().add_Hm().format(startedAt);
+
+              return InkWell(
+                onTap: () {
+                  if (run['route'] != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => RunMapScreen(
+                          routeJson: jsonEncode(run['route']),
                         ),
                       ),
-                  ],
+                    );
+                  }
+                },
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          formattedDate,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text("Distance: ${(run['distance'] / 1000).toStringAsFixed(2)} km"),
+                        Text("Duration: ${_formatDuration(run['duration'])}"),
+                        Text("Avg Speed: ${run['avg_speed'].toStringAsFixed(2)} km/h"),
+                        Text("Steps: ${run['steps']}"),
+                        if (run['route'] != null)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 8),
+                            child: Text(
+                              "Tap to view route on map",
+                              style: TextStyle(fontSize: 14, color: Colors.blue),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           );
         },
       ),

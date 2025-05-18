@@ -15,13 +15,7 @@ class WeeklyPlanDaysScreen extends StatefulWidget {
 class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
     with SingleTickerProviderStateMixin {
   final List<String> weekDays = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday'
+    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
   ];
 
   late AnimationController _controller;
@@ -96,35 +90,27 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
     });
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Widget buildAnimatedDayTile(String day, int index, double width) {
+  Widget buildDayCard(String day, int index, double width) {
     final theme = Theme.of(context);
     final info = dayData[day];
     final title = info?['title'] as String?;
     final hasExercises = info?['hasExercises'] == true;
     final description = info?['description'] ?? '';
     final scheduledTime = info?['scheduled_time'];
+    final baseTextColor = hasExercises
+        ? theme.colorScheme.onSurface
+        : theme.colorScheme.onSurface.withOpacity(0.6);
 
     final displayText = title != null && title.trim().isNotEmpty
         ? '$day — $title'
         : '$day — No title set';
 
-    final color = hasExercises ? Colors.black : Colors.grey.shade500;
-
     return FadeTransition(
       opacity: Tween<double>(begin: 0, end: 1).animate(
         CurvedAnimation(
           parent: _controller,
-          curve: Interval(
-            0.1 * index,
-            (0.1 * index + 0.5).clamp(0.0, 1.0),
-            curve: Curves.easeOut,
-          ),
+          curve: Interval(0.1 * index, (0.1 * index + 0.5).clamp(0.0, 1.0),
+              curve: Curves.easeOut),
         ),
       ),
       child: GestureDetector(
@@ -132,14 +118,15 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
         child: SizedBox(
           width: width,
           child: Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             elevation: 5,
             margin: const EdgeInsets.all(8),
-            shadowColor: theme.shadowColor.withOpacity(0.15),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 26),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
                     children: [
@@ -147,33 +134,31 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
                         child: Text(
                           displayText,
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 18,
                             fontWeight: FontWeight.w600,
-                            color: color,
+                            color: baseTextColor,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const Icon(Icons.chevron_right, size: 26),
+                      const Icon(Icons.chevron_right, size: 24),
                     ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          description.isNotEmpty ? description : 'No description set',
-                          style: TextStyle(fontSize: 14, color: color),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          scheduledTime != null
-                              ? 'Scheduled at: $scheduledTime'
-                              : 'No time set',
-                          style: TextStyle(fontSize: 14, color: color),
-                        ),
-                      ],
+                  const SizedBox(height: 10),
+                  if (description.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Text(
+                        description,
+                        style: TextStyle(fontSize: 14, color: baseTextColor),
+                      ),
                     ),
+                  Text(
+                    scheduledTime != null
+                        ? 'Scheduled at: $scheduledTime'
+                        : 'No time set',
+                    style: TextStyle(fontSize: 14, color: baseTextColor),
                   ),
                 ],
               ),
@@ -188,7 +173,7 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
   Widget build(BuildContext context) {
     final isTablet = MediaQuery.of(context).size.width > 600;
     final crossAxisCount = isTablet ? 2 : 1;
-    final itemWidth = MediaQuery.of(context).size.width / crossAxisCount;
+    final itemWidth = MediaQuery.of(context).size.width / crossAxisCount - 32;
 
     return Scaffold(
       appBar: AppBar(
@@ -196,19 +181,16 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : GridView.builder(
+          : SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: isTablet ? 2.5 : 2.1,
+        child: Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          children: [
+            for (int i = 0; i < weekDays.length; i++)
+              buildDayCard(weekDays[i], i, itemWidth),
+          ],
         ),
-        itemCount: weekDays.length,
-        itemBuilder: (context, index) {
-          final day = weekDays[index];
-          return buildAnimatedDayTile(day, index, itemWidth);
-        },
       ),
     );
   }

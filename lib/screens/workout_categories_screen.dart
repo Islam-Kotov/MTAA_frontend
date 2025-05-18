@@ -124,7 +124,7 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
                         MaterialPageRoute(
                           builder: (_) => WorkoutsListScreen(
                             categoryName: category['name'],
-                            selectedDay: widget.selectedDay, // nullable, handled later
+                            selectedDay: widget.selectedDay,
                           ),
                         ),
                       );
@@ -133,6 +133,7 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
                       width: width,
                       child: Card(
                         elevation: 4,
+                        color: theme.cardColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -140,7 +141,7 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
                           child: Row(
                             children: [
-                              const Icon(Icons.fitness_center, size: 36),
+                              Icon(Icons.fitness_center, size: 36, color: theme.iconTheme.color),
                               const SizedBox(width: 16),
                               Expanded(
                                 child: Text(
@@ -150,7 +151,7 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
                                   ),
                                 ),
                               ),
-                              const Icon(Icons.arrow_forward_ios, size: 16),
+                              Icon(Icons.arrow_forward_ios, size: 16, color: theme.iconTheme.color),
                             ],
                           ),
                         ),

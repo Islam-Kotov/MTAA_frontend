@@ -67,6 +67,7 @@ Future<bool> logout() async {
   );
 
   if (response.statusCode == 200) {
+    stopPingSocketConnection();
     print('${response.body}');
     return true;
   } else {
@@ -276,23 +277,26 @@ class _ProfileScreen extends State<ProfileScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text('Failed to load profile.'),
-              SizedBox(height: 4),
-              ListTile(
-                leading: Icon(Icons.logout_sharp, size: 32),
-                title: Text(
-                  'Logout',
-                  style: TextStyle(
-                    fontSize: 22,
+              SizedBox(height: 20),
+              Container(
+                width: 300,
+                child: ListTile(
+                  leading: Icon(Icons.logout_sharp, size: 32),
+                  title: Text(
+                    'Logout',
+                    style: TextStyle(
+                      fontSize: 22,
+                    ),
                   ),
+                  trailing: Icon(Icons.arrow_forward_ios),
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AuthorizationScreen()),
+                    );
+                  },
                 ),
-                trailing: Icon(Icons.arrow_forward_ios),
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const AuthorizationScreen()),
-                  );
-                },
-              ),
+              )
             ],
           )
         ),
@@ -305,206 +309,424 @@ class _ProfileScreen extends State<ProfileScreen> {
       appBar: AppBar(
         title: const Text('Profile'),
       ),
-      body: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            color: colors.primaryContainer,
-            padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-            child: Column(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          bool isTablet = constraints.maxWidth >= 600;
+          final orientation = MediaQuery.of(context).orientation;
+
+          if (isTablet && orientation == Orientation.landscape) {
+            return Row(
               children: [
-                GestureDetector(
-                  onTap: () {
-                    if (profileImageBytes != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => FullScreenImage(imageBytes: profileImageBytes!),
-                        ),
-                      );
-                    }
-                  },
-                  child: CircleAvatar(
-                    backgroundColor: Colors.white,
-                    radius: 55,
-                    backgroundImage: profileImageBytes != null
-                      ? MemoryImage(profileImageBytes!)
-                      : null,
-                    child: profileImageBytes == null
-                      ? Icon(Icons.person, size: 40)
-                      : null,
-                  ),
-                ),
-                Text(
-                  profileData!['name'] ?? '',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold
-                  )
-                ),
-                SizedBox(height: 4),
-                Text(
-                  profileData!['email'] ?? '',
-                  style: TextStyle(
-                    fontSize: 16,
-                  )
-                ),
-                SizedBox(height: 4),
+                // Left side: profile summary
                 Container(
-                  padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: colors.secondaryContainer,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  width: 600, // constrain width explicitly for tablet
+                  color: colors.primaryContainer,
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Column(
-                        children: [
-                          Text(
-                            '${profileData!['weight']}',
-                            style: TextStyle(
-                              fontSize: 16,
-                            )
-                          ),
-                          Text(
-                            'Weight',
-                            style: TextStyle(
-                              fontSize: 16,
-                            )
-                          )
-                        ],
+                      GestureDetector(
+                        onTap: () {
+                          if (profileImageBytes != null) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => FullScreenImage(imageBytes: profileImageBytes!),
+                              ),
+                            );
+                          }
+                        },
+                        child: CircleAvatar(
+                          backgroundColor: Colors.white,
+                          radius: 55,
+                          backgroundImage: profileImageBytes != null ? MemoryImage(profileImageBytes!) : null,
+                          child: profileImageBytes == null ? const Icon(Icons.person, size: 40) : null,
+                        ),
                       ),
+                      const SizedBox(height: 20),
+                      Text(
+                        profileData!['name'] ?? '',
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        profileData!['email'] ?? '',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(height: 20),
                       Container(
-                        height: 60,
-                        width: 1,
-                        color: Colors.white,
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                      ),
-                      Column(
-                        children: [
-                          Text(
-                            '${profileData!['height']}',
-                            style: TextStyle(
-                              fontSize: 16,
-                            )
-                          ),
-                          Text(
-                            'Height',
-                            style: TextStyle(
-                              fontSize: 16,
-                            )
-                          )
-                        ],
-                      ),
-                      Container(
-                        height: 60,
-                        width: 1,
-                        color: Colors.white,
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                      ),
-                      Column(
-                        children: [
-                          Text(
-                            '${profileData!['birthdate']}',
-                            style: TextStyle(
-                              fontSize: 16,
-                            )
-                          ),
-                          Text(
-                            'Birthdate',
-                            style: TextStyle(
-                              fontSize: 16,
-                            )
-                          )
-                        ],
+                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: colors.secondaryContainer,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _infoColumn('Weight', profileData!['weight']),
+                            _divider(),
+                            _infoColumn('Height', profileData!['height']),
+                            _divider(),
+                            _infoColumn('Birthdate', profileData!['birthdate']),
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                )
+                ),
+
+                // Right side: menu
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      // mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _menuCard(
+                          icon: Icons.person_outline_sharp,
+                          label: 'My profile',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => MyProfilePage()),
+                            ).then((_) => fetchProfile());
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        _menuCard(
+                          icon: Icons.settings,
+                          label: 'Settings',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => SettingsPage()),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        _menuCard(
+                          icon: Icons.logout_sharp,
+                          label: 'Logout',
+                          onTap: () async {
+                            final success = await logout();
+                            if (!context.mounted) return;
+
+                            if (success) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => const AuthorizationScreen()),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Logout failed')),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 20),
               ],
-            ),
-          ),
-          SizedBox(height: 10),
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 20,
+            );
+          } else {
+            return Column(
               children: [
-                Card(
-                  child: ListTile(
-                    leading: Icon(Icons.person_outline_sharp, size: 32),
-                    title: Text(
-                      'My profile',
-                      style: TextStyle(
-                        fontSize: 22,
+                Container(
+                  width: double.infinity,
+                  color: colors.primaryContainer,
+                  padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                  child: Column(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          if (profileImageBytes != null) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => FullScreenImage(imageBytes: profileImageBytes!),
+                              ),
+                            );
+                          }
+                        },
+                        child: CircleAvatar(
+                          backgroundColor: Colors.white,
+                          radius: 55,
+                          backgroundImage: profileImageBytes != null
+                            ? MemoryImage(profileImageBytes!)
+                            : null,
+                          child: profileImageBytes == null
+                            ? Icon(Icons.person, size: 40)
+                            : null,
+                        ),
                       ),
-                    ),
-                    trailing: Icon(Icons.arrow_forward_ios),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => MyProfilePage()),
-                      ).then((_) {
-                        fetchProfile();
-                      });
-                    },
-                  )
+                      Text(
+                        profileData!['name'] ?? '',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold
+                        )
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        profileData!['email'] ?? '',
+                        style: TextStyle(
+                          fontSize: 16,
+                        )
+                      ),
+                      SizedBox(height: 4),
+                      Container(
+                        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: colors.secondaryContainer,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Column(
+                              children: [
+                                Text(
+                                  '${profileData!['weight']}',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  )
+                                ),
+                                Text(
+                                  'Weight',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  )
+                                )
+                              ],
+                            ),
+                            Container(
+                              height: 60,
+                              width: 1,
+                              color: Colors.white,
+                              margin: const EdgeInsets.symmetric(horizontal: 16),
+                            ),
+                            Column(
+                              children: [
+                                Text(
+                                  '${profileData!['height']}',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  )
+                                ),
+                                Text(
+                                  'Height',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  )
+                                )
+                              ],
+                            ),
+                            Container(
+                              height: 60,
+                              width: 1,
+                              color: Colors.white,
+                              margin: const EdgeInsets.symmetric(horizontal: 16),
+                            ),
+                            Column(
+                              children: [
+                                Text(
+                                  '${profileData!['birthdate']}',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  )
+                                ),
+                                Text(
+                                  'Birthdate',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  )
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
                 ),
-                Card(
-                  child: ListTile(
-                    leading: Icon(Icons.settings, size: 32),
-                    title: Text(
-                      'Settings',
-                      style: TextStyle(
-                        fontSize: 22,
+                SizedBox(height: 10),
+                Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 20,
+                    children: [
+                      isTablet ? Row(
+                        children: [
+                          Expanded(
+                            child: Card(
+                              child: ListTile(
+                                leading: Icon(Icons.person_outline_sharp, size: 32),
+                                title: Text(
+                                  'My profile',
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                  ),
+                                ),
+                                trailing: Icon(Icons.arrow_forward_ios),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => MyProfilePage()),
+                                  ).then((_) {
+                                    fetchProfile();
+                                  });
+                                },
+                              )
+                            ),
+                          ),
+                          Expanded(
+                            child: Card(
+                              child: ListTile(
+                                leading: Icon(Icons.settings, size: 32),
+                                title: Text(
+                                  'Settings',
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                  ),
+                                ),
+                                trailing: Icon(Icons.arrow_forward_ios),
+                                onTap: () {
+                                    Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => SettingsPage()),
+                                  );
+                                },
+                              )
+                            ),
+                          )
+                        ],
+                      ) : Column(
+                        children: [
+                          Card(
+                            child: ListTile(
+                              leading: Icon(Icons.person_outline_sharp, size: 32),
+                              title: Text(
+                                'My profile',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                ),
+                              ),
+                              trailing: Icon(Icons.arrow_forward_ios),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => MyProfilePage()),
+                                ).then((_) {
+                                  fetchProfile();
+                                });
+                              },
+                            )
+                          ),
+                          Card(
+                            child: ListTile(
+                              leading: Icon(Icons.settings, size: 32),
+                              title: Text(
+                                'Settings',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                ),
+                              ),
+                              trailing: Icon(Icons.arrow_forward_ios),
+                              onTap: () {
+                                  Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => SettingsPage()),
+                                );
+                              },
+                            )
+                          ),
+                        ] 
                       ),
-                    ),
-                    trailing: Icon(Icons.arrow_forward_ios),
-                    onTap: () {
-                        Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SettingsPage()),
-                      );
-                    },
-                  )
-                ),
-                Card(
-                  child: ListTile(
-                    leading: Icon(Icons.logout_sharp, size: 32),
-                    title: Text(
-                      'Logout',
-                      style: TextStyle(
-                        fontSize: 22,
+                      Card(
+                        child: ListTile(
+                          leading: Icon(Icons.logout_sharp, size: 32),
+                          title: Text(
+                            'Logout',
+                            style: TextStyle(
+                              fontSize: 22,
+                            ),
+                          ),
+                          trailing: Icon(Icons.arrow_forward_ios),
+                          onTap: () async {
+                            final success = await logout();
+
+                            if (!mounted) return; // Prevent using context if widget is disposed
+
+                            if (success) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => const AuthorizationScreen()),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Logout failed')),
+                              );
+                            }
+                          },
+                        )
                       ),
-                    ),
-                    trailing: Icon(Icons.arrow_forward_ios),
-                    onTap: () async {
-                      final success = await logout();
-
-                      if (!mounted) return; // Prevent using context if widget is disposed
-
-                      if (success) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => const AuthorizationScreen()),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Logout failed')),
-                        );
-                      }
-                    },
-                  )
+                    ],
+                  ),
                 ),
               ],
-            ),
-          ),
-        ],
+            );
+          }
+        }
       )
     );
   }
 }
+
+Widget _menuCard({
+  required IconData icon,
+  required String label,
+  required VoidCallback onTap,
+}) {
+  return Card(
+    child: ListTile(
+      leading: Icon(icon, size: 32),
+      title: Text(
+        label,
+        style: const TextStyle(fontSize: 22),
+      ),
+      trailing: const Icon(Icons.arrow_forward_ios),
+      onTap: onTap,
+    ),
+  );
+}
+
+Widget _infoColumn(String label, dynamic value) {
+  return Column(
+    children: [
+      Text(
+        '$value',
+        style: const TextStyle(fontSize: 16),
+      ),
+      Text(
+        label,
+        style: const TextStyle(fontSize: 16),
+      ),
+    ],
+  );
+}
+
+Widget _divider() {
+  return Container(
+    height: 60,
+    width: 1,
+    color: Colors.white,
+    margin: const EdgeInsets.symmetric(horizontal: 16),
+  );
+}
+
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});

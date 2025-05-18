@@ -7,10 +7,18 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'friends_screen.dart';
 import 'leaderboard_screen.dart';
 
-void pingSocketConnection() {
-  Timer.periodic(const Duration(seconds: 10), (Timer timer) {
+Timer? _pingTimer;
+
+void startPingSocketConnection() {
+  _pingTimer?.cancel(); // Cancel if already running
+  _pingTimer = Timer.periodic(const Duration(seconds: 10), (Timer timer) {
     getCurrentChallenge();
   });
+}
+
+void stopPingSocketConnection() {
+  _pingTimer?.cancel();
+  _pingTimer = null;
 }
 
 Future<void> getCurrentChallenge() async {
@@ -42,7 +50,7 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
   @override
   void initState() {
     super.initState();
-    pingSocketConnection();
+    startPingSocketConnection();
 
     _controller = AnimationController(
       vsync: this,

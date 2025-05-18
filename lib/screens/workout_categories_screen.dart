@@ -37,16 +37,16 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
           isLoading = false;
           hasError = false;
         });
-        log('Categories loaded: ${categories.length}');
+        // log('Categories loaded: ${categories.length}');
       } else {
-        log('Failed to load categories: ${response.statusCode}', error: response.body);
+        // log('Failed to load categories: ${response.statusCode}', error: response.body);
         setState(() {
           isLoading = false;
           hasError = true;
         });
       }
     } catch (e) {
-      log('Exception during fetch', error: e);
+      // log('Exception during fetch', error: e);
       setState(() {
         isLoading = false;
         hasError = true;

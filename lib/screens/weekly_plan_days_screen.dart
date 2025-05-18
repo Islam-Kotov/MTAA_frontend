@@ -206,4 +206,10 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
       ),
     );
   }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 }

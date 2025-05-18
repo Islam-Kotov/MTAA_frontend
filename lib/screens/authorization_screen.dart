@@ -83,35 +83,37 @@ class _AuthorizationScreenState extends State<AuthorizationScreen> {
   }
 
   Widget _buildTabletLayout() {
-    return Row(
-      children: [
-        Expanded(
-          child: Center(
-            child: Image.asset('assets/images/dumbell_icon.png', width: 300),
+    return SingleChildScrollView(
+      child: Row(
+        children: [
+          Expanded(
+            child: Center(
+              child: Image.asset('assets/images/dumbell_icon.png', width: 350),
+            ),
           ),
-        ),
-        Expanded(
-          child: Center(
-            child: Container(
-              width: 400,
-              padding: const EdgeInsets.all(32),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.white.withOpacity(0.9),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('FitLife',
-                      style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 32),
-                  _buildFormContent(),
-                ],
+          Expanded(
+            child: Center(
+              child: Container(
+                width: 350,
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.white.withOpacity(0.9),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('FitLife',
+                        style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    _buildFormContent(),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

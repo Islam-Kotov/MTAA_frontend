@@ -205,80 +205,169 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
               child: Text('Filter: $selectedFilter', style: theme.textTheme.bodyLarge),
             ),
           Expanded(
-            child: isFiltering
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: filteredWorkouts.length,
-              itemBuilder: (context, index) {
-                final workout = filteredWorkouts[index];
-                final name = workout['exercise_name'] ?? 'Unnamed';
-                final type = workout['exercise_type'] ?? '';
-                final imageUrl = workout['exercise_photo'];
-                final heroTag = 'exercise-image-${workout['id']}';
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                bool isTablet = constraints.maxWidth >= 600;
 
-                return Semantics(
-                  button: true,
-                  child: Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                if (isTablet) {
+                  return isFiltering
+                    ? const Center(child: CircularProgressIndicator())
+                    : GridView.builder(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 3.5,
                     ),
-                    child: ListTile(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => WorkoutDetailScreen(
-                              workoutId: workout['id'],
-                              heroTag: heroTag,
-                            ),
-                          ),
-                        );
-                      },
-                      contentPadding: const EdgeInsets.all(14),
-                      leading: Hero(
-                        tag: heroTag,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: imageUrl != null
-                              ? Image.network(
-                            imageUrl,
-                            width: 60,
-                            height: 60,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              width: 60,
-                              height: 60,
-                              color: Colors.grey.shade300,
-                              child: const Icon(Icons.broken_image),
-                            ),
-                          )
-                              : Container(
-                            width: 60,
-                            height: 60,
-                            color: Colors.grey.shade300,
-                            child: const Icon(Icons.image_not_supported),
-                          ),
-                        ),
-                      ),
-                      title: ExcludeSemantics(child: Text(name)),
-                      subtitle: ExcludeSemantics(child: Text(type)),
-                      trailing: widget.selectedDay != null
-                          ? Semantics(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: filteredWorkouts.length,
+                    itemBuilder: (context, index) {
+                      final workout = filteredWorkouts[index];
+                      final name = workout['exercise_name'] ?? 'Unnamed';
+                      final type = workout['exercise_type'] ?? '';
+                      final imageUrl = workout['exercise_photo'];
+                      final heroTag = 'exercise-image-${workout['id']}';
+
+                      return Semantics(
                         button: true,
-                        child: IconButton(
-                          icon: const Icon(Icons.add_circle, size: 32, color: Colors.blue),
-                          onPressed: () => showAddDialog(workout['id']),
+                        child: Card(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: ListTile(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => WorkoutDetailScreen(
+                                    workoutId: workout['id'],
+                                    heroTag: heroTag,
+                                  ),
+                                ),
+                              );
+                            },
+                            contentPadding: const EdgeInsets.all(14),
+                            leading: Hero(
+                              tag: heroTag,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: imageUrl != null
+                                    ? Image.network(
+                                  imageUrl,
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    width: 60,
+                                    height: 60,
+                                    color: Colors.grey.shade300,
+                                    child: const Icon(Icons.broken_image),
+                                  ),
+                                )
+                                    : Container(
+                                  width: 60,
+                                  height: 60,
+                                  color: Colors.grey.shade300,
+                                  child: const Icon(Icons.image_not_supported),
+                                ),
+                              ),
+                            ),
+                            title: ExcludeSemantics(child: Text(name)),
+                            subtitle: ExcludeSemantics(child: Text(type)),
+                            trailing: widget.selectedDay != null
+                                ? Semantics(
+                              button: true,
+                              child: IconButton(
+                                icon: const Icon(Icons.add_circle, size: 32, color: Colors.blue),
+                                onPressed: () => showAddDialog(workout['id']),
+                              ),
+                            )
+                                : null,
+                          ),
                         ),
-                      )
-                          : null,
-                    ),
-                  ),
-                );
-              },
-            ),
+                      );
+                    },
+                  );
+                } else {
+                  return isFiltering
+                    ? const Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: filteredWorkouts.length,
+                    itemBuilder: (context, index) {
+                      final workout = filteredWorkouts[index];
+                      final name = workout['exercise_name'] ?? 'Unnamed';
+                      final type = workout['exercise_type'] ?? '';
+                      final imageUrl = workout['exercise_photo'];
+                      final heroTag = 'exercise-image-${workout['id']}';
+
+                      return Semantics(
+                        button: true,
+                        child: Card(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: ListTile(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => WorkoutDetailScreen(
+                                    workoutId: workout['id'],
+                                    heroTag: heroTag,
+                                  ),
+                                ),
+                              );
+                            },
+                            contentPadding: const EdgeInsets.all(14),
+                            leading: Hero(
+                              tag: heroTag,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: imageUrl != null
+                                    ? Image.network(
+                                  imageUrl,
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    width: 60,
+                                    height: 60,
+                                    color: Colors.grey.shade300,
+                                    child: const Icon(Icons.broken_image),
+                                  ),
+                                )
+                                    : Container(
+                                  width: 60,
+                                  height: 60,
+                                  color: Colors.grey.shade300,
+                                  child: const Icon(Icons.image_not_supported),
+                                ),
+                              ),
+                            ),
+                            title: ExcludeSemantics(child: Text(name)),
+                            subtitle: ExcludeSemantics(child: Text(type)),
+                            trailing: widget.selectedDay != null
+                                ? Semantics(
+                              button: true,
+                              child: IconButton(
+                                icon: const Icon(Icons.add_circle, size: 32, color: Colors.blue),
+                                onPressed: () => showAddDialog(workout['id']),
+                              ),
+                            )
+                                : null,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }
+              }
+            )
           ),
         ],
       ),

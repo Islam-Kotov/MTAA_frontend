@@ -97,86 +97,90 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
 
     return Scaffold(
       appBar: AppBar(title: const Text('Community')),
-      body: Center(
+      body: Align(
+        alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 600),
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Friends button
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: ElevatedButton.icon(
-                    style: _buttonStyle(),
-                    icon: const Icon(Icons.people_outline),
-                    label: Text('Friends', style: textStyle.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const FriendsScreen()));
-                    },
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Friends button
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: ElevatedButton.icon(
+                      style: _buttonStyle(),
+                      icon: const Icon(Icons.people_outline),
+                      label: Text('Friends', style: textStyle.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const FriendsScreen()));
+                      },
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-
-                // Leaderboard button (below friends)
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: ElevatedButton.icon(
-                    style: _buttonStyle(),
-                    icon: const Icon(Icons.leaderboard),
-                    label: Text('Leaderboard', style: textStyle.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const LeaderboardScreen()));
-                    },
+                  const SizedBox(height: 24),
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: ElevatedButton.icon(
+                      style: _buttonStyle(),
+                      icon: const Icon(Icons.leaderboard),
+                      label: Text('Leaderboard', style: textStyle.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const LeaderboardScreen()));
+                      },
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                // Challenge stream area
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 30),
-                  decoration: BoxDecoration(
-                    color: colors.onPrimary,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white10),
+                  const SizedBox(height: 24),
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 30),
+                      decoration: BoxDecoration(
+                        color: colors.onPrimary,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.white10),
+                      ),
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Text(
+                              'Daily challenge',
+                              style: textStyle.titleMedium?.copyWith(fontWeight: FontWeight.bold)
+                            ),
+                            StreamBuilder(
+                              stream: channel.stream,
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  try {
+                                    final jsonData = jsonDecode(snapshot.data as String);
+                                    final innerData = jsonData['data'];
+                                    final decoded = innerData is String ? jsonDecode(innerData) : innerData;
+                                    final challenge = decoded['challenge'];
+                                    final message = challenge != null ? challenge['description'] : 'No message available';
+                                    return Text(message);
+                                  } catch (_) {
+                                    return const Text('Error parsing message');
+                                  }
+                                } else if (snapshot.hasError) {
+                                  return Text('Error: ${snapshot.error}');
+                                } else {
+                                  return const Text('Waiting for data...');
+                                }
+                              },
+                            ),
+                          ],
+                        )
+                      ),
+                    ),
                   ),
-                  child: Center(
-                    child: Column(
-                      children: [
-                        Text(
-                          'Daily challenge',
-                          style: textStyle.titleMedium?.copyWith(fontWeight: FontWeight.bold)
-                        ),
-                        StreamBuilder(
-                          stream: channel.stream,
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              try {
-                                final jsonData = jsonDecode(snapshot.data as String);
-                                final innerData = jsonData['data'];
-                                final decoded = innerData is String ? jsonDecode(innerData) : innerData;
-                                final challenge = decoded['challenge'];
-                                final message = challenge != null ? challenge['description'] : 'No message available';
-                                return Text(message);
-                              } catch (_) {
-                                return const Text('Error parsing message');
-                              }
-                            } else if (snapshot.hasError) {
-                              return Text('Error: ${snapshot.error}');
-                            } else {
-                              return const Text('Waiting for data...');
-                            }
-                          },
-                        ),
-                      ],
-                    )
-                  ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            )
           ),
         ),
-      ),
+      )
     );
   }
 }

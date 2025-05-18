@@ -318,18 +318,27 @@ class _WeeklyPlanDetailScreenState extends State<WeeklyPlanDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (title.isNotEmpty)
+        title.isNotEmpty ?
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Text('Title: $title', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+          ) :
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text('No Title', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
           ),
-        if (scheduledTime != null && scheduledTime!.isNotEmpty)
+        scheduledTime != null && scheduledTime!.isNotEmpty ?
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Text('Scheduled Time: $scheduledTime', style: const TextStyle(fontSize: 16)),
+          ) :
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text('No Scheduled Time', style: const TextStyle(fontSize: 16)),
           ),
-        if (description.isNotEmpty)
-          Text(description, style: const TextStyle(fontSize: 14)),
+        description.isNotEmpty ?
+          Text(description, style: const TextStyle(fontSize: 14)) :
+          Text("No Description", style: const TextStyle(fontSize: 14))
       ],
     );
   }

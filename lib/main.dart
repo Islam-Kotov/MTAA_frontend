@@ -50,11 +50,6 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
   ),
 );
 
-// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-//   print('Handling a background message: ${message.messageId}');
-// }
-
-// Entry point with optional test mode and testTargetScreen override
 void main({bool isTesting = false, Widget? testTargetScreen}) {
   runApp(
     ChangeNotifierProvider(

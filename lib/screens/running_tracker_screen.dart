@@ -385,7 +385,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
       elevation: 4,
       color: theme.cardColor,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(10),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

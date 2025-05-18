@@ -12,6 +12,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dart:io' show Platform;
 
+bool notificationsOn = false;
+
 Future<Uint8List> showPrivate(String photo_url) async {
   final url = Uri.parse(photo_url);
 
@@ -317,252 +319,299 @@ class _ProfileScreen extends State<ProfileScreen> {
           final orientation = MediaQuery.of(context).orientation;
 
           if (isTablet && orientation == Orientation.landscape) {
-            return Row(
-              children: [
-                // Left side: profile summary
-                Container(
-                  width: 600, // constrain width explicitly for tablet
-                  color: colors.primaryContainer,
-                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          if (profileImageBytes != null) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => FullScreenImage(imageBytes: profileImageBytes!),
-                              ),
-                            );
-                          }
-                        },
-                        child: CircleAvatar(
-                          backgroundColor: Colors.white,
-                          radius: 55,
-                          backgroundImage: profileImageBytes != null ? MemoryImage(profileImageBytes!) : null,
-                          child: profileImageBytes == null ? const Icon(Icons.person, size: 40) : null,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        profileData!['name'] ?? '',
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        profileData!['email'] ?? '',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      const SizedBox(height: 20),
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: colors.secondaryContainer,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _infoColumn('Weight', profileData!['weight']),
-                            _divider(),
-                            _infoColumn('Height', profileData!['height']),
-                            _divider(),
-                            _infoColumn('Birthdate', profileData!['birthdate']),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Right side: menu
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Center(
+            return SingleChildScrollView(
+              child: Row(
+                children: [
+                  // Left side: profile summary
+                  Container(
+                    width: 500, // constrain width explicitly for tablet
+                    color: colors.primaryContainer,
+                    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
                     child: Column(
-                      // mainAxisAlignment: MainAxisAlignment.end,
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _menuCard(
-                          icon: Icons.person_outline_sharp,
-                          label: 'My profile',
+                        GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => MyProfilePage()),
-                            ).then((_) => fetchProfile());
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        _menuCard(
-                          icon: Icons.settings,
-                          label: 'Settings',
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => SettingsPage()),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        _menuCard(
-                          icon: Icons.logout_sharp,
-                          label: 'Logout',
-                          onTap: () async {
-                            final success = await logout();
-                            if (!context.mounted) return;
-
-                            if (success) {
-                              Navigator.pushReplacement(
+                            if (profileImageBytes != null) {
+                              Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const AuthorizationScreen()),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Logout failed')),
+                                MaterialPageRoute(
+                                  builder: (_) => FullScreenImage(imageBytes: profileImageBytes!),
+                                ),
                               );
                             }
                           },
+                          child: CircleAvatar(
+                            backgroundColor: Colors.white,
+                            radius: 55,
+                            backgroundImage: profileImageBytes != null ? MemoryImage(profileImageBytes!) : null,
+                            child: profileImageBytes == null ? const Icon(Icons.person, size: 40) : null,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          profileData!['name'] ?? '',
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          profileData!['email'] ?? '',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(height: 20),
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: colors.secondaryContainer,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _infoColumn('Weight', profileData!['weight']),
+                              _divider(),
+                              _infoColumn('Height', profileData!['height']),
+                              _divider(),
+                              _infoColumn('Birthdate', profileData!['birthdate']),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(width: 20),
-              ],
+
+                  // Right side: menu
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Center(
+                      child: Column(
+                        // mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _menuCard(
+                            icon: Icons.person_outline_sharp,
+                            label: 'My profile',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => MyProfilePage()),
+                              ).then((_) => fetchProfile());
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          _menuCard(
+                            icon: Icons.settings,
+                            label: 'Settings',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => SettingsPage()),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          _menuCard(
+                            icon: Icons.logout_sharp,
+                            label: 'Logout',
+                            onTap: () async {
+                              final success = await logout();
+                              if (!context.mounted) return;
+
+                              if (success) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const AuthorizationScreen()),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Logout failed')),
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                ],
+              ),
             );
           } else {
-            return Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  color: colors.primaryContainer,
-                  padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                  child: Column(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          if (profileImageBytes != null) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => FullScreenImage(imageBytes: profileImageBytes!),
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    color: colors.primaryContainer,
+                    padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                    child: Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            if (profileImageBytes != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => FullScreenImage(imageBytes: profileImageBytes!),
+                                ),
+                              );
+                            }
+                          },
+                          child: CircleAvatar(
+                            backgroundColor: Colors.white,
+                            radius: 55,
+                            backgroundImage: profileImageBytes != null
+                              ? MemoryImage(profileImageBytes!)
+                              : null,
+                            child: profileImageBytes == null
+                              ? Icon(Icons.person, size: 40)
+                              : null,
+                          ),
+                        ),
+                        Text(
+                          profileData!['name'] ?? '',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold
+                          )
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          profileData!['email'] ?? '',
+                          style: TextStyle(
+                            fontSize: 16,
+                          )
+                        ),
+                        SizedBox(height: 4),
+                        Container(
+                          padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: colors.secondaryContainer,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Column(
+                                children: [
+                                  Text(
+                                    '${profileData!['weight']}',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )
+                                  ),
+                                  Text(
+                                    'Weight',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )
+                                  )
+                                ],
                               ),
-                            );
-                          }
-                        },
-                        child: CircleAvatar(
-                          backgroundColor: Colors.white,
-                          radius: 55,
-                          backgroundImage: profileImageBytes != null
-                            ? MemoryImage(profileImageBytes!)
-                            : null,
-                          child: profileImageBytes == null
-                            ? Icon(Icons.person, size: 40)
-                            : null,
-                        ),
-                      ),
-                      Text(
-                        profileData!['name'] ?? '',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold
+                              Container(
+                                height: 60,
+                                width: 1,
+                                color: Colors.white,
+                                margin: const EdgeInsets.symmetric(horizontal: 16),
+                              ),
+                              Column(
+                                children: [
+                                  Text(
+                                    '${profileData!['height']}',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )
+                                  ),
+                                  Text(
+                                    'Height',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )
+                                  )
+                                ],
+                              ),
+                              Container(
+                                height: 60,
+                                width: 1,
+                                color: Colors.white,
+                                margin: const EdgeInsets.symmetric(horizontal: 16),
+                              ),
+                              Column(
+                                children: [
+                                  Text(
+                                    '${profileData!['birthdate']}',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )
+                                  ),
+                                  Text(
+                                    'Birthdate',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
                         )
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        profileData!['email'] ?? '',
-                        style: TextStyle(
-                          fontSize: 16,
-                        )
-                      ),
-                      SizedBox(height: 4),
-                      Container(
-                        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: colors.secondaryContainer,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Column(
-                              children: [
-                                Text(
-                                  '${profileData!['weight']}',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  )
-                                ),
-                                Text(
-                                  'Weight',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  )
-                                )
-                              ],
-                            ),
-                            Container(
-                              height: 60,
-                              width: 1,
-                              color: Colors.white,
-                              margin: const EdgeInsets.symmetric(horizontal: 16),
-                            ),
-                            Column(
-                              children: [
-                                Text(
-                                  '${profileData!['height']}',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  )
-                                ),
-                                Text(
-                                  'Height',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  )
-                                )
-                              ],
-                            ),
-                            Container(
-                              height: 60,
-                              width: 1,
-                              color: Colors.white,
-                              margin: const EdgeInsets.symmetric(horizontal: 16),
-                            ),
-                            Column(
-                              children: [
-                                Text(
-                                  '${profileData!['birthdate']}',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  )
-                                ),
-                                Text(
-                                  'Birthdate',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  )
-                                )
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(height: 10),
-                Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      isTablet ? Row(
-                        children: [
-                          Expanded(
-                            child: Card(
+                  SizedBox(height: 10),
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        isTablet ? Row(
+                          children: [
+                            Expanded(
+                              child: Card(
+                                child: ListTile(
+                                  leading: Icon(Icons.person_outline_sharp, size: 32),
+                                  title: Text(
+                                    'My profile',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                    ),
+                                  ),
+                                  trailing: Icon(Icons.arrow_forward_ios),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => MyProfilePage()),
+                                    ).then((_) {
+                                      fetchProfile();
+                                    });
+                                  },
+                                )
+                              ),
+                            ),
+                            Expanded(
+                              child: Card(
+                                child: ListTile(
+                                  leading: Icon(Icons.settings, size: 32),
+                                  title: Text(
+                                    'Settings',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                    ),
+                                  ),
+                                  trailing: Icon(Icons.arrow_forward_ios),
+                                  onTap: () {
+                                      Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => SettingsPage()),
+                                    );
+                                  },
+                                )
+                              ),
+                            )
+                          ],
+                        ) : Column(
+                          children: [
+                            Card(
                               child: ListTile(
                                 leading: Icon(Icons.person_outline_sharp, size: 32),
                                 title: Text(
@@ -582,9 +631,7 @@ class _ProfileScreen extends State<ProfileScreen> {
                                 },
                               )
                             ),
-                          ),
-                          Expanded(
-                            child: Card(
+                            Card(
                               child: ListTile(
                                 leading: Icon(Icons.settings, size: 32),
                                 title: Text(
@@ -602,82 +649,41 @@ class _ProfileScreen extends State<ProfileScreen> {
                                 },
                               )
                             ),
-                          )
-                        ],
-                      ) : Column(
-                        children: [
-                          Card(
-                            child: ListTile(
-                              leading: Icon(Icons.person_outline_sharp, size: 32),
-                              title: Text(
-                                'My profile',
-                                style: TextStyle(
-                                  fontSize: 22,
-                                ),
+                          ] 
+                        ),
+                        Card(
+                          child: ListTile(
+                            leading: Icon(Icons.logout_sharp, size: 32),
+                            title: Text(
+                              'Logout',
+                              style: TextStyle(
+                                fontSize: 22,
                               ),
-                              trailing: Icon(Icons.arrow_forward_ios),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => MyProfilePage()),
-                                ).then((_) {
-                                  fetchProfile();
-                                });
-                              },
-                            )
-                          ),
-                          Card(
-                            child: ListTile(
-                              leading: Icon(Icons.settings, size: 32),
-                              title: Text(
-                                'Settings',
-                                style: TextStyle(
-                                  fontSize: 22,
-                                ),
-                              ),
-                              trailing: Icon(Icons.arrow_forward_ios),
-                              onTap: () {
-                                  Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => SettingsPage()),
-                                );
-                              },
-                            )
-                          ),
-                        ] 
-                      ),
-                      Card(
-                        child: ListTile(
-                          leading: Icon(Icons.logout_sharp, size: 32),
-                          title: Text(
-                            'Logout',
-                            style: TextStyle(
-                              fontSize: 22,
                             ),
-                          ),
-                          trailing: Icon(Icons.arrow_forward_ios),
-                          onTap: () async {
-                            final success = await logout();
+                            trailing: Icon(Icons.arrow_forward_ios),
+                            onTap: () async {
+                              final success = await logout();
 
-                            if (!mounted) return; // Prevent using context if widget is disposed
+                              if (!mounted) return; // Prevent using context if widget is disposed
 
-                            if (success) {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(builder: (context) => const AuthorizationScreen()),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Logout failed')),
-                              );
-                            }
-                          },
-                        )
-                      ),
-                    ],
+                              if (success) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const AuthorizationScreen()),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Logout failed')),
+                                );
+                              }
+                            },
+                          )
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           }
         }
@@ -738,65 +744,151 @@ class SettingsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Settings'),
       ),
-      body: Column(
-        children: [
-          ListTile(
-            leading: Icon(Icons.notifications, size: 32),
-            title: Text(
-              'Notifications',
-              style: TextStyle(
-                fontSize: 22,
-              ),
-            ),
-            trailing: NotificationsSwitch(),
-          ),
-          ListTile(
-            leading: Icon(Icons.dark_mode_outlined, size: 32),
-            title: Text(
-              'Dark mode',
-              style: TextStyle(
-                fontSize: 22,
-              ),
-            ),
-            trailing: DarkmodeSwitch(),
-          ),
-          ListTile(
-            leading: Icon(Icons.password_sharp, size: 32),
-            title: Text(
-              'Reset the password',
-              style: TextStyle(
-                fontSize: 22,
-              ),
-            ),
-            trailing: Icon(Icons.arrow_forward_ios),
-            onTap: () async {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return PasswordResetDialog();
-                },
-              );
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.delete_outline_sharp, size: 32),
-            title: Text(
-              'Delete account',
-              style: TextStyle(
-                fontSize: 22,
-              ),
-            ),
-            trailing: Icon(Icons.arrow_forward_ios),
-            onTap: () async {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return DeleteAccountDialog();
-                },
-              );
-            },
-          ),
-        ],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          bool isTablet = constraints.maxWidth >= 600;
+          final orientation = MediaQuery.of(context).orientation;
+
+          if (isTablet) {
+            return  Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: ListTile(
+                        leading: Icon(Icons.notifications, size: 32),
+                        title: Text(
+                          'Notifications',
+                          style: TextStyle(
+                            fontSize: 22,
+                          ),
+                        ),
+                        trailing: NotificationsSwitch(),
+                      ),
+                    ),
+                    Expanded(
+                      child: ListTile(
+                        leading: Icon(Icons.dark_mode_outlined, size: 32),
+                        title: Text(
+                          'Dark mode',
+                          style: TextStyle(
+                            fontSize: 22,
+                          ),
+                        ),
+                        trailing: DarkmodeSwitch(),
+                      ),
+                    )
+                  ],
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ListTile(
+                        leading: Icon(Icons.password_sharp, size: 32),
+                        title: Text(
+                          'Reset the password',
+                          style: TextStyle(
+                            fontSize: 22,
+                          ),
+                        ),
+                        trailing: Icon(Icons.arrow_forward_ios),
+                        onTap: () async {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return PasswordResetDialog();
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: ListTile(
+                        leading: Icon(Icons.delete_outline_sharp, size: 32),
+                        title: Text(
+                          'Delete account',
+                          style: TextStyle(
+                            fontSize: 22,
+                          ),
+                        ),
+                        trailing: Icon(Icons.arrow_forward_ios),
+                        onTap: () async {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return DeleteAccountDialog();
+                            },
+                          );
+                        },
+                      ),
+                    )
+                  ],
+                ),
+              ],
+            );
+          } else {
+            return Column(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.notifications, size: 32),
+                  title: Text(
+                    'Notifications',
+                    style: TextStyle(
+                      fontSize: 22,
+                    ),
+                  ),
+                  trailing: NotificationsSwitch(),
+                ),
+                ListTile(
+                  leading: Icon(Icons.dark_mode_outlined, size: 32),
+                  title: Text(
+                    'Dark mode',
+                    style: TextStyle(
+                      fontSize: 22,
+                    ),
+                  ),
+                  trailing: DarkmodeSwitch(),
+                ),
+                ListTile(
+                  leading: Icon(Icons.password_sharp, size: 32),
+                  title: Text(
+                    'Reset the password',
+                    style: TextStyle(
+                      fontSize: 22,
+                    ),
+                  ),
+                  trailing: Icon(Icons.arrow_forward_ios),
+                  onTap: () async {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return PasswordResetDialog();
+                      },
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.delete_outline_sharp, size: 32),
+                  title: Text(
+                    'Delete account',
+                    style: TextStyle(
+                      fontSize: 22,
+                    ),
+                  ),
+                  trailing: Icon(Icons.arrow_forward_ios),
+                  onTap: () async {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return DeleteAccountDialog();
+                      },
+                    );
+                  },
+                ),
+              ],
+            );
+          }
+        }
       )
     );
   }
@@ -991,7 +1083,6 @@ class NotificationsSwitch extends StatefulWidget {
 }
 
 class _NotificationsSwitchState extends State<NotificationsSwitch> {
-  bool notificationsOn = false;
   Future<void> _enableNotifications() async {
     if (Platform.isAndroid) {
       await Firebase.initializeApp();
@@ -1122,216 +1213,377 @@ class _MyProfilePageState extends State<MyProfilePage> {
           title: const Text('My profile'),
         ),
         resizeToAvoidBottomInset: false,
-        body: Column(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Container(
-              width: double.infinity,
-              color: colors.primaryContainer,
-              padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-              child: Column(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      if (profileImageBytes != null) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => FullScreenImage(imageBytes: profileImageBytes!),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            bool isTablet = constraints.maxWidth >= 600;
+            final orientation = MediaQuery.of(context).orientation;
+
+            if (isTablet && orientation == Orientation.landscape) {
+              return SingleChildScrollView(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 500, // constrain width explicitly for tablet
+                      color: colors.primaryContainer,
+                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              if (profileImageBytes != null) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => FullScreenImage(imageBytes: profileImageBytes!),
+                                  ),
+                                );
+                              }
+                            },
+                            child: CircleAvatar(
+                              backgroundColor: Colors.white,
+                              radius: 55,
+                              backgroundImage: profileImageBytes != null ? MemoryImage(profileImageBytes!) : null,
+                              child: profileImageBytes == null ? const Icon(Icons.person, size: 40) : null,
+                            ),
                           ),
-                        );
-                      }
-                    },
-                    child: CircleAvatar(
-                      backgroundColor: Colors.white,
-                      radius: 55,
-                      backgroundImage: profileImageBytes != null
-                        ? MemoryImage(profileImageBytes!)
-                        : null,
-                      child: profileImageBytes == null
-                        ? Icon(Icons.person, size: 40)
-                        : null,
-                    ),
-                  ),
-                  Text(
-                    profileData!['name'] ?? '',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold
-                    )
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    profileData!['email'] ?? '',
-                    style: TextStyle(
-                      fontSize: 16,
-                    )
-                  ),
-                  SizedBox(height: 4),
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: colors.secondaryContainer,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Column(
-                          children: [
-                            Text(
-                              '${profileData!['weight']}',
-                              style: TextStyle(
-                                fontSize: 16,
-                              )
+                          const SizedBox(height: 20),
+                          Text(
+                            profileData!['name'] ?? '',
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            profileData!['email'] ?? '',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(height: 20),
+                          Container(
+                            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: colors.secondaryContainer,
                             ),
-                            Text(
-                              'Weight',
-                              style: TextStyle(
-                                fontSize: 16,
-                              )
-                            )
-                          ],
-                        ),
-                        Container(
-                          height: 60, // adjust as needed
-                          width: 1,
-                          color: Colors.white,
-                          margin: const EdgeInsets.symmetric(horizontal: 16),
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                              '${profileData!['height']}',
-                              style: TextStyle(
-                                fontSize: 16,
-                              )
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                _infoColumn('Weight', profileData!['weight']),
+                                _divider(),
+                                _infoColumn('Height', profileData!['height']),
+                                _divider(),
+                                _infoColumn('Birthdate', profileData!['birthdate']),
+                              ],
                             ),
-                            Text(
-                              'Height',
-                              style: TextStyle(
-                                fontSize: 16,
-                              )
-                            )
-                          ],
-                        ),
-                        Container(
-                          height: 60, // adjust as needed
-                          width: 1,
-                          color: Colors.white,
-                          margin: const EdgeInsets.symmetric(horizontal: 16),
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                              '${profileData!['birthdate']}',
-                              style: TextStyle(
-                                fontSize: 16,
-                              )
-                            ),
-                            Text(
-                              'Birthdate',
-                              style: TextStyle(
-                                fontSize: 16,
-                              )
-                            )
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
-                  )
-                ],
-              ),
-            ),
-            SizedBox(height: 10),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                TextField(
+                                  controller: weightController,
+                                  decoration: InputDecoration(labelText: 'Weight'),
+                                ),
+                                SizedBox(height: 14),
+                                TextField(
+                                  controller: heightController,
+                                  decoration: InputDecoration(labelText: 'Height'),
+                                ),
+                                SizedBox(height: 14),
+                                TextField(
+                                  controller: birthdateController,
+                                  decoration: InputDecoration(labelText: 'Birthdate'),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 30),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () async {
+                                  final picker = ImagePicker();
+                                  final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+                                  if (pickedFile != null) {
+                                    final success = await saveProfilePhoto(pickedFile);
+
+                                    // print('Uploading file: ${pickedFile.path}');
+                                    // print('File exists: ${await pickedFile.exists()}');
+                                    // print('Length: ${await pickedFile.length()} bytes');
+
+                                    if (success) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Profile photo updated successfully')),
+                                      );
+                                      fetchProfile();
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Profile photo update failed')),
+                                      );
+                                    }
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('No image selected')),
+                                    );
+                                  }
+                                },
+                                child: const Text('Upload photo'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  final weight = weightController.text;
+                                  final height = heightController.text;
+                                  final birthdate = birthdateController.text;
+
+                                  final success = await saveProfile(weight, height, birthdate);
+                                  
+                                  if (success) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Profile updated successfully')),
+                                    );
+                                    fetchProfile();
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Profile update failed')),
+                                    );
+                                  }
+                                },
+                                child: const Text('Update profile'),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              return Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  Container(
+                    width: double.infinity,
+                    color: colors.primaryContainer,
+                    padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        TextField(
-                          controller: weightController,
-                          decoration: InputDecoration(labelText: 'Weight'),
+                        GestureDetector(
+                          onTap: () {
+                            if (profileImageBytes != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => FullScreenImage(imageBytes: profileImageBytes!),
+                                ),
+                              );
+                            }
+                          },
+                          child: CircleAvatar(
+                            backgroundColor: Colors.white,
+                            radius: 55,
+                            backgroundImage: profileImageBytes != null
+                              ? MemoryImage(profileImageBytes!)
+                              : null,
+                            child: profileImageBytes == null
+                              ? Icon(Icons.person, size: 40)
+                              : null,
+                          ),
                         ),
-                        SizedBox(height: 14),
-                        TextField(
-                          controller: heightController,
-                          decoration: InputDecoration(labelText: 'Height'),
+                        Text(
+                          profileData!['name'] ?? '',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold
+                          )
                         ),
-                        SizedBox(height: 14),
-                        TextField(
-                          controller: birthdateController,
-                          decoration: InputDecoration(labelText: 'Birthdate'),
+                        SizedBox(height: 4),
+                        Text(
+                          profileData!['email'] ?? '',
+                          style: TextStyle(
+                            fontSize: 16,
+                          )
                         ),
+                        SizedBox(height: 4),
+                        Container(
+                          padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: colors.secondaryContainer,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Column(
+                                children: [
+                                  Text(
+                                    '${profileData!['weight']}',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )
+                                  ),
+                                  Text(
+                                    'Weight',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )
+                                  )
+                                ],
+                              ),
+                              Container(
+                                height: 60, // adjust as needed
+                                width: 1,
+                                color: Colors.white,
+                                margin: const EdgeInsets.symmetric(horizontal: 16),
+                              ),
+                              Column(
+                                children: [
+                                  Text(
+                                    '${profileData!['height']}',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )
+                                  ),
+                                  Text(
+                                    'Height',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )
+                                  )
+                                ],
+                              ),
+                              Container(
+                                height: 60, // adjust as needed
+                                width: 1,
+                                color: Colors.white,
+                                margin: const EdgeInsets.symmetric(horizontal: 16),
+                              ),
+                              Column(
+                                children: [
+                                  Text(
+                                    '${profileData!['birthdate']}',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )
+                                  ),
+                                  Text(
+                                    'Birthdate',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    )
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
+                        )
                       ],
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () async {
-                          final picker = ImagePicker();
-                          final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+                  SizedBox(height: 10),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              TextField(
+                                controller: weightController,
+                                decoration: InputDecoration(labelText: 'Weight'),
+                              ),
+                              SizedBox(height: 14),
+                              TextField(
+                                controller: heightController,
+                                decoration: InputDecoration(labelText: 'Height'),
+                              ),
+                              SizedBox(height: 14),
+                              TextField(
+                                controller: birthdateController,
+                                decoration: InputDecoration(labelText: 'Birthdate'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 30),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () async {
+                                final picker = ImagePicker();
+                                final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-                          if (pickedFile != null) {
-                            final success = await saveProfilePhoto(pickedFile);
+                                if (pickedFile != null) {
+                                  final success = await saveProfilePhoto(pickedFile);
 
-                            // print('Uploading file: ${pickedFile.path}');
-                            // print('File exists: ${await pickedFile.exists()}');
-                            // print('Length: ${await pickedFile.length()} bytes');
+                                  // print('Uploading file: ${pickedFile.path}');
+                                  // print('File exists: ${await pickedFile.exists()}');
+                                  // print('Length: ${await pickedFile.length()} bytes');
 
-                            if (success) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Profile photo updated successfully')),
-                              );
-                              fetchProfile();
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Profile photo update failed')),
-                              );
-                            }
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('No image selected')),
-                            );
-                          }
-                        },
-                        child: const Text('Upload photo'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () async {
-                          final weight = weightController.text;
-                          final height = heightController.text;
-                          final birthdate = birthdateController.text;
+                                  if (success) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Profile photo updated successfully')),
+                                    );
+                                    fetchProfile();
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Profile photo update failed')),
+                                    );
+                                  }
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('No image selected')),
+                                  );
+                                }
+                              },
+                              child: const Text('Upload photo'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                final weight = weightController.text;
+                                final height = heightController.text;
+                                final birthdate = birthdateController.text;
 
-                          final success = await saveProfile(weight, height, birthdate);
-                          
-                          if (success) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Profile updated successfully')),
-                            );
-                            fetchProfile();
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Profile update failed')),
-                            );
-                          }
-                        },
-                        child: const Text('Update profile'),
-                      ),
-                    ],
-                  )
+                                final success = await saveProfile(weight, height, birthdate);
+                                
+                                if (success) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Profile updated successfully')),
+                                  );
+                                  fetchProfile();
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Profile update failed')),
+                                  );
+                                }
+                              },
+                              child: const Text('Update profile'),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 70),
                 ],
-              ),
-            ),
-            SizedBox(height: 70),
-          ],
+              );
+            }
+          }
         )
       )
     );

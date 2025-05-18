@@ -70,7 +70,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             itemBuilder: (context, index) {
               final entry = leaderboard[index];
               final name = entry['name'] ?? 'Unknown';
-              final distance = (entry['distance']).toStringAsFixed(2);
+              final distance = (entry['distance'] / 1000).toStringAsFixed(2);
               final startedAt = DateTime.parse(entry['started_at']);
               final dateFormatted = DateFormat.yMMMd().add_Hm().format(startedAt);
               return Card(

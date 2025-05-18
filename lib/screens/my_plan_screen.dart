@@ -96,21 +96,23 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                       width: isTablet ? (constraints.maxWidth - 60) / 2 : double.infinity,
                       child: FadeTransition(
                         opacity: _preparedFade,
-                        child: ElevatedButton.icon(
-                          style: _buttonStyle(),
-                          icon: const Icon(Icons.fitness_center, size: 28),
-                          label: ExcludeSemantics(
-                            child: Text(
+                        child: Semantics(
+                          button: true,
+                          label: 'Choose a prepared workout plan',
+                          child: ElevatedButton.icon(
+                            style: _buttonStyle(),
+                            icon: const Icon(Icons.fitness_center, size: 28),
+                            label: Text(
                               'Choose a Prepared Workout Plan',
                               style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                             ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const PredefinedLevelsScreen()),
+                              );
+                            },
                           ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const PredefinedLevelsScreen()),
-                            );
-                          },
                         ),
                       ),
                     ),
@@ -120,21 +122,23 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                       width: isTablet ? (constraints.maxWidth - 60) / 2 : double.infinity,
                       child: FadeTransition(
                         opacity: _customFade,
-                        child: ElevatedButton.icon(
-                          style: _buttonStyle(),
-                          icon: const Icon(Icons.edit_note, size: 28),
-                          label: ExcludeSemantics(
-                            child: Text(
+                        child: Semantics(
+                          button: true,
+                          label: 'Create my own workout plan',
+                          child: ElevatedButton.icon(
+                            style: _buttonStyle(),
+                            icon: const Icon(Icons.edit_note, size: 28),
+                            label: Text(
                               'Create My Own Plan',
                               style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                             ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const WeeklyPlanDaysScreen()),
+                              );
+                            },
                           ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const WeeklyPlanDaysScreen()),
-                            );
-                          },
                         ),
                       ),
                     ),
@@ -171,12 +175,10 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                                 children: [
                                   const Icon(Icons.directions_run, size: 40),
                                   const SizedBox(height: 10),
-                                  ExcludeSemantics(
-                                    child: Text(
-                                      'Go for a run',
-                                      style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                                      textAlign: TextAlign.center,
-                                    ),
+                                  Text(
+                                    'Go for a run',
+                                    style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                    textAlign: TextAlign.center,
                                   ),
                                 ],
                               ),

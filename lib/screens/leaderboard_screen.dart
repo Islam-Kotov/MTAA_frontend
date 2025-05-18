@@ -47,7 +47,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   String _formatDuration(int seconds) {
     final min = seconds ~/ 60;
     final sec = seconds % 60;
-    return '${min}m ${sec}s';
+    return '${min} min ${sec} sec';
   }
 
   @override
@@ -70,7 +70,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             itemBuilder: (context, index) {
               final entry = leaderboard[index];
               final name = entry['name'] ?? 'Unknown';
-              final distance = (entry['distance'] / 1000).toStringAsFixed(2);
+              final distance = (entry['distance']).toStringAsFixed(2);
               final startedAt = DateTime.parse(entry['started_at']);
               final dateFormatted = DateFormat.yMMMd().add_Hm().format(startedAt);
               return Card(
@@ -82,7 +82,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                     child: Text('${index + 1}', style: const TextStyle(color: Colors.white)),
                   ),
                   title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text("Distance: $distance km\nDuration: ${_formatDuration(entry['duration'])}"),
+                  subtitle: Text("Distance: ${distance} km\nDuration: ${_formatDuration(entry['duration'])}"),
                   trailing: Text(dateFormatted, style: const TextStyle(fontSize: 12)),
                 ),
               );

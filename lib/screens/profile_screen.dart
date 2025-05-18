@@ -256,6 +256,8 @@ class _ProfileScreen extends State<ProfileScreen> {
     });
     if (data != null && data['photo_url'] != null) {
       final avatar = await showPrivate(data['photo_url']);
+      if (!mounted) return;
+
       setState(() {
         profileImageBytes = avatar;
       });
@@ -556,7 +558,6 @@ class _ProfileScreen extends State<ProfileScreen> {
                 Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    spacing: 20,
                     children: [
                       isTablet ? Row(
                         children: [

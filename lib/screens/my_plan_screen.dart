@@ -98,7 +98,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                         opacity: _preparedFade,
                         child: Semantics(
                           button: true,
-                          label: 'Choose a prepared workout plan',
+                          // label: 'Choose a prepared workout plan',
                           child: ElevatedButton.icon(
                             style: _buttonStyle(),
                             icon: const Icon(Icons.fitness_center, size: 28),
@@ -124,7 +124,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                         opacity: _customFade,
                         child: Semantics(
                           button: true,
-                          label: 'Create my own workout plan',
+                          // label: 'Create my own workout plan',
                           child: ElevatedButton.icon(
                             style: _buttonStyle(),
                             icon: const Icon(Icons.edit_note, size: 28),
@@ -150,7 +150,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                         opacity: _runFade,
                         child: Semantics(
                           button: true,
-                          label: 'Go for a run',
+                          // label: 'Go for a run',
                           child: GestureDetector(
                             onTap: () {
                               Navigator.push(

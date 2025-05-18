@@ -218,66 +218,62 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
                 final heroTag = 'exercise-image-${workout['id']}';
 
                 return Semantics(
-                  label: '$name, $type',
                   button: true,
-                  child: ExcludeSemantics(
-                    child: Card(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: ListTile(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => WorkoutDetailScreen(
-                                workoutId: workout['id'],
-                                heroTag: heroTag,
-                              ),
+                  child: Card(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: ListTile(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => WorkoutDetailScreen(
+                              workoutId: workout['id'],
+                              heroTag: heroTag,
                             ),
-                          );
-                        },
-                        contentPadding: const EdgeInsets.all(14),
-                        leading: Hero(
-                          tag: heroTag,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: imageUrl != null
-                                ? Image.network(
-                              imageUrl,
-                              width: 60,
-                              height: 60,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
-                                width: 60,
-                                height: 60,
-                                color: Colors.grey.shade300,
-                                child: const Icon(Icons.broken_image),
-                              ),
-                            )
-                                : Container(
+                          ),
+                        );
+                      },
+                      contentPadding: const EdgeInsets.all(14),
+                      leading: Hero(
+                        tag: heroTag,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: imageUrl != null
+                              ? Image.network(
+                            imageUrl,
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
                               width: 60,
                               height: 60,
                               color: Colors.grey.shade300,
-                              child: const Icon(Icons.image_not_supported),
+                              child: const Icon(Icons.broken_image),
                             ),
+                          )
+                              : Container(
+                            width: 60,
+                            height: 60,
+                            color: Colors.grey.shade300,
+                            child: const Icon(Icons.image_not_supported),
                           ),
                         ),
-                        title: ExcludeSemantics(child: Text(name)),
-                        subtitle: ExcludeSemantics(child: Text(type)),
-                        trailing: widget.selectedDay != null
-                            ? Semantics(
-                          label: 'Add this exercise',
-                          button: true,
-                          child: IconButton(
-                            icon: const Icon(Icons.add_circle, size: 32, color: Colors.blue),
-                            onPressed: () => showAddDialog(workout['id']),
-                          ),
-                        )
-                            : null,
                       ),
+                      title: ExcludeSemantics(child: Text(name)),
+                      subtitle: ExcludeSemantics(child: Text(type)),
+                      trailing: widget.selectedDay != null
+                          ? Semantics(
+                        button: true,
+                        child: IconButton(
+                          icon: const Icon(Icons.add_circle, size: 32, color: Colors.blue),
+                          onPressed: () => showAddDialog(workout['id']),
+                        ),
+                      )
+                          : null,
                     ),
                   ),
                 );

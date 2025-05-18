@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/semantics.dart';
 import 'run_map_screen.dart';
 
 class RunHistoryScreen extends StatefulWidget {

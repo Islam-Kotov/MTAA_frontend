@@ -369,9 +369,9 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
           children: [
             _infoTile("Time", _elapsedTime),
             _infoTile("Distance", "${(_distance / 1000).toStringAsFixed(2)} km"),
-            _infoTile("Avg Speed", _averageSpeedText()),
+            _infoTile("Average Speed", _averageSpeedText()),
             _infoTile("Steps", "$_steps"),
-            _infoTile("Accel", _accelerationText),
+            _infoTile("Acceleration", _accelerationText),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,

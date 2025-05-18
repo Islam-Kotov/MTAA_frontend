@@ -111,6 +111,8 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
     }
     if (scheduledTime != null) {
       semanticsLabel.write(', Scheduled at $scheduledTime');
+    } else {
+      semanticsLabel.write(', No time set');
     }
 
     return FadeTransition(
@@ -131,43 +133,45 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
               elevation: 5,
               margin: const EdgeInsets.all(8),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            displayText,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: baseTextColor,
+              child: ExcludeSemantics(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              displayText,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: baseTextColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const Icon(Icons.chevron_right, size: 24),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      if (description.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: Text(
+                            description,
+                            style: TextStyle(fontSize: 14, color: baseTextColor),
                           ),
                         ),
-                        const Icon(Icons.chevron_right, size: 24),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    if (description.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Text(
-                          description,
-                          style: TextStyle(fontSize: 14, color: baseTextColor),
-                        ),
+                      Text(
+                        scheduledTime != null ? 'Scheduled at: $scheduledTime' : 'No time set',
+                        style: TextStyle(fontSize: 14, color: baseTextColor),
                       ),
-                    Text(
-                      scheduledTime != null ? 'Scheduled at: $scheduledTime' : 'No time set',
-                      style: TextStyle(fontSize: 14, color: baseTextColor),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

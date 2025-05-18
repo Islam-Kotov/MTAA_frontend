@@ -93,7 +93,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                   spacing: 20,
                   runSpacing: 24,
                   children: [
-                    // 🏋️ Prepared plan
+                    // Prepared plan
                     SizedBox(
                       width: isTablet ? (constraints.maxWidth - 60) / 2 : double.infinity,
                       child: FadeTransition(
@@ -119,7 +119,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                       ),
                     ),
 
-                    // ✏️ Custom plan
+                    // Custom plan
                     SizedBox(
                       width: isTablet ? (constraints.maxWidth - 60) / 2 : double.infinity,
                       child: FadeTransition(
@@ -145,7 +145,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                       ),
                     ),
 
-                    // 🏃‍♂️ Run
+                    // Go for a run
                     SizedBox(
                       width: isTablet ? (constraints.maxWidth - 60) / 2 : double.infinity,
                       child: FadeTransition(
@@ -153,6 +153,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> with TickerProviderStateMix
                         child: Semantics(
                           button: true,
                           label: 'Go for a run',
+                          excludeSemantics: true,
                           child: GestureDetector(
                             onTap: () {
                               Navigator.push(

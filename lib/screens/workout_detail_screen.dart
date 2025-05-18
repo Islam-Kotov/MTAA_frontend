@@ -115,14 +115,14 @@ class WorkoutDetailScreen extends StatelessWidget {
 
                     const SizedBox(height: 28),
 
-                    _infoCard(
+                    _semanticInfoCard(
                       icon: Icons.fitness_center_outlined,
                       label: 'Target Muscles',
                       value: workout['main_muscles'] ?? 'N/A',
                     ),
                     const SizedBox(height: 18),
 
-                    _infoCard(
+                    _semanticInfoCard(
                       icon: Icons.build_outlined,
                       label: 'Equipment Required',
                       value: workout['equipment_req'] ?? 'N/A',
@@ -158,12 +158,12 @@ class WorkoutDetailScreen extends StatelessWidget {
                           ),
                         );
                       },
-                      child: _infoCard(
+                      child: _semanticInfoCard(
                         icon: Icons.description_outlined,
                         label: 'Execution Guide (Tap to Expand)',
                         value: workout['execution_guide'] ?? 'N/A',
-                        multiline: true,
                         isClickable: true,
+                        multiline: true,
                       ),
                     ),
                   ],
@@ -176,57 +176,63 @@ class WorkoutDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _infoCard({
+  Widget _semanticInfoCard({
     required IconData icon,
     required String label,
     required String value,
     bool multiline = false,
     bool isClickable = false,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          )
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment:
-        multiline ? CrossAxisAlignment.start : CrossAxisAlignment.center,
-        children: [
-          Icon(icon, size: 30, color: Colors.black87),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label.toUpperCase(),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 18,
-                    height: 1.5,
-                    color: isClickable ? Colors.black : Colors.black87,
-                  ),
-                ),
-              ],
-            ),
+    return Semantics(
+      label: '$label: $value',
+      button: isClickable,
+      child: ExcludeSemantics(
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              )
+            ],
           ),
-        ],
+          child: Row(
+            crossAxisAlignment:
+            multiline ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+            children: [
+              Icon(icon, size: 30, color: Colors.black87),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label.toUpperCase(),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: 18,
+                        height: 1.5,
+                        color: isClickable ? Colors.black : Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

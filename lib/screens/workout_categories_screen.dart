@@ -37,16 +37,13 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
           isLoading = false;
           hasError = false;
         });
-        // log('Categories loaded: ${categories.length}');
       } else {
-        // log('Failed to load categories: ${response.statusCode}', error: response.body);
         setState(() {
           isLoading = false;
           hasError = true;
         });
       }
     } catch (e) {
-      // log('Exception during fetch', error: e);
       setState(() {
         isLoading = false;
         hasError = true;
@@ -114,45 +111,48 @@ class _WorkoutCategoriesScreenState extends State<WorkoutCategoriesScreen> {
                       child: child,
                     ),
                   ),
-                  child: GestureDetector(
-                    onTap: () {
-                      log('Opening category: ${category['name']}'
-                          '${widget.selectedDay != null ? ' for ${widget.selectedDay}' : ''}');
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => WorkoutsListScreen(
-                            categoryName: category['name'],
-                            selectedDay: widget.selectedDay,
+                  child: Semantics(
+                    button: true,
+                    label: '${category['name']} category',
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => WorkoutsListScreen(
+                              categoryName: category['name'],
+                              selectedDay: widget.selectedDay,
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                    child: SizedBox(
-                      width: width,
-                      child: Card(
-                        elevation: 4,
-                        color: theme.cardColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                          child: Row(
-                            children: [
-                              Icon(Icons.fitness_center, size: 36, color: theme.iconTheme.color),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Text(
-                                  category['name'],
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
+                        );
+                      },
+                      child: SizedBox(
+                        width: width,
+                        child: Card(
+                          elevation: 4,
+                          color: theme.cardColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                            child: Row(
+                              children: [
+                                Icon(Icons.fitness_center, size: 36, color: theme.iconTheme.color),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: ExcludeSemantics(
+                                    child: Text(
+                                      category['name'],
+                                      style: theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Icon(Icons.arrow_forward_ios, size: 16, color: theme.iconTheme.color),
-                            ],
+                                Icon(Icons.arrow_forward_ios, size: 16, color: theme.iconTheme.color),
+                              ],
+                            ),
                           ),
                         ),
                       ),

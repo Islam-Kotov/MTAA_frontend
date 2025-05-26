@@ -14,7 +14,7 @@ class WorkoutDetailScreen extends StatelessWidget {
   });
 
   Future<Map?> fetchWorkout() async {
-    final uri = Uri.parse('http://192.168.1.36:8000/api/workouts/$workoutId');
+    final uri = Uri.parse('http://147.175.162.111:8000/api/workouts/$workoutId');
     log('Fetching workout details from: $uri');
 
     try {

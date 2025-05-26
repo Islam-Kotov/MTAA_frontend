@@ -38,7 +38,7 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
 
     apiToken = token;
 
-    final uri = Uri.parse('http://192.168.1.36:8000/api/plan');
+    final uri = Uri.parse('http://147.175.162.111:8000/api/plan');
     final response = await http.get(uri, headers: {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
   }
 
   Future<void> removeExercise(int workoutId) async {
-    final uri = Uri.parse('http://192.168.1.36:8000/api/plan/remove/$workoutId');
+    final uri = Uri.parse('http://147.175.162.111:8000/api/plan/remove/$workoutId');
     final response = await http.delete(uri, headers: {
       'Authorization': 'Bearer $apiToken',
       'Content-Type': 'application/json',
@@ -118,7 +118,7 @@ class _MyOwnPlanScreenState extends State<MyOwnPlanScreen> {
   }
 
   Future<void> updateExercise(int workoutId, int sets, int reps) async {
-    final uri = Uri.parse('http://192.168.1.36:8000/api/plan/update');
+    final uri = Uri.parse('http://147.175.162.111:8000/api/plan/update');
     final response = await http.put(uri,
         headers: {
           'Authorization': 'Bearer $apiToken',

@@ -29,7 +29,7 @@ class _RunHistoryScreenState extends State<RunHistoryScreen> {
     if (token == null) return;
 
     final response = await http.get(
-      Uri.parse('http://192.168.1.36:8000/api/runs'),
+      Uri.parse('http://147.175.162.111:8000/api/runs'),
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',

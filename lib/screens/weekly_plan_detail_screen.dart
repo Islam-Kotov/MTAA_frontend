@@ -41,7 +41,7 @@ class _WeeklyPlanDetailScreenState extends State<WeeklyPlanDetailScreen> {
     if (token == null) return;
 
     apiToken = token;
-    final uri = Uri.parse('http://192.168.1.36:8000/api/weekly-plan');
+    final uri = Uri.parse('http://147.175.162.111:8000/api/weekly-plan');
     final response = await http.get(uri, headers: {
       'Authorization': 'Bearer $token',
       'Accept': 'application/json',
@@ -70,7 +70,7 @@ class _WeeklyPlanDetailScreenState extends State<WeeklyPlanDetailScreen> {
 
   Future<void> updateMeta() async {
     if (apiToken == null) return;
-    final uri = Uri.parse('http://192.168.1.36:8000/api/weekly-plan/update-meta');
+    final uri = Uri.parse('http://147.175.162.111:8000/api/weekly-plan/update-meta');
     final response = await http.patch(uri,
       headers: {
         'Authorization': 'Bearer $apiToken',
@@ -95,7 +95,7 @@ class _WeeklyPlanDetailScreenState extends State<WeeklyPlanDetailScreen> {
   }
 
   Future<void> updateExercise(int workoutId, int sets, int reps) async {
-    final uri = Uri.parse('http://192.168.1.36:8000/api/weekly-plan/add');
+    final uri = Uri.parse('http://147.175.162.111:8000/api/weekly-plan/add');
     final response = await http.post(uri,
       headers: {
         'Authorization': 'Bearer $apiToken',
@@ -117,7 +117,7 @@ class _WeeklyPlanDetailScreenState extends State<WeeklyPlanDetailScreen> {
   }
 
   Future<void> removeWorkout(int workoutId) async {
-    final uri = Uri.parse('http://192.168.1.36:8000/api/weekly-plan/remove');
+    final uri = Uri.parse('http://147.175.162.111:8000/api/weekly-plan/remove');
     final response = await http.delete(uri,
       headers: {
         'Authorization': 'Bearer $apiToken',

@@ -27,7 +27,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     if (token == null) return;
 
     final response = await http.get(
-      Uri.parse('http://192.168.1.36:8000/api/leaderboard/friends'),
+      Uri.parse('http://147.175.162.111:8000/api/leaderboard/friends'),
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',

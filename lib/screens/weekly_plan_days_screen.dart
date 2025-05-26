@@ -47,7 +47,7 @@ class _WeeklyPlanDaysScreenState extends State<WeeklyPlanDaysScreen>
   }
 
   Future<void> fetchWeeklyPlanData() async {
-    final uri = Uri.parse('http://192.168.1.36:8000/api/weekly-plan');
+    final uri = Uri.parse('http://147.175.162.111:8000/api/weekly-plan');
     final response = await http.get(uri, headers: {
       'Authorization': 'Bearer $token',
       'Accept': 'application/json',

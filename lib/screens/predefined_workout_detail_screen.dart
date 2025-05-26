@@ -32,7 +32,7 @@ class _PredefinedWorkoutDetailScreenState
   Future<void> fetchWorkoutDetail() async {
     setState(() => isLoading = true);
     final uri = Uri.parse(
-        'http://192.168.1.36:8000/api/predefined-workouts/${widget.workoutId}');
+        'http://147.175.162.111:8000/api/predefined-workouts/${widget.workoutId}');
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {

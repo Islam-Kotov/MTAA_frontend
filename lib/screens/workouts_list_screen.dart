@@ -50,7 +50,7 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
 
   Future<void> fetchWorkouts() async {
     final uri = Uri.parse(
-      'http://192.168.1.36:8000/api/workouts?category=${Uri.encodeComponent(widget.categoryName)}',
+      'http://147.175.162.111:8000/api/workouts?category=${Uri.encodeComponent(widget.categoryName)}',
     );
     try {
       final response = await http.get(uri, headers: {
@@ -143,7 +143,7 @@ class _WorkoutsListScreenState extends State<WorkoutsListScreen> {
   Future<void> addToWeeklyPlan(int workoutId, int sets, int reps) async {
     if (widget.selectedDay == null) return;
 
-    final uri = Uri.parse('http://192.168.1.36:8000/api/weekly-plan/add');
+    final uri = Uri.parse('http://147.175.162.111:8000/api/weekly-plan/add');
 
     try {
       final response = await http.post(

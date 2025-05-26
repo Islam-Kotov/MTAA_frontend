@@ -22,7 +22,7 @@ void stopPingSocketConnection() {
 }
 
 Future<void> getCurrentChallenge() async {
-  final url = Uri.parse('http://192.168.1.36:8000/api/getCurrentChallenge');
+  final url = Uri.parse('http://147.175.162.111:8000/api/getCurrentChallenge');
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('api_token');
 

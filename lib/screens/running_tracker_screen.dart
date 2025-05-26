@@ -226,7 +226,7 @@ class _RunningTrackerScreenState extends State<RunningTrackerScreen> {
     final routeJson = _routeCoords.map((coord) => {'lat': coord.latitude, 'lng': coord.longitude}).toList();
 
     final response = await http.post(
-      Uri.parse('http://192.168.1.36:8000/api/runs'),
+      Uri.parse('http://147.175.162.111:8000/api/runs'),
       headers: {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json",

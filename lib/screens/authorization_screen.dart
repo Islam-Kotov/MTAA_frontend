@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'all_screens.dart';
 
 Future<bool> loginUser(String email, String password) async {
-  final url = Uri.parse('http://192.168.1.36:8000/api/auth/login');
+  final url = Uri.parse('http://147.175.162.111:8000/api/auth/login');
 
   final response = await http.post(
     url,
